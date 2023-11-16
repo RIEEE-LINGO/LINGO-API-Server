@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  title: "LINGO Server"
+  description: "API for the LINGO project"
+  version: "1.0.0"
+
+servers:
+  - url: "/api"
+
+components:
+  schemas:
+    Word:
+      type: "object"
+      required:
+        - word
+      properties:
+        id:
+          type: "string"
+        word:
+          type: "string"
+    Reflection:
+      type: "object"
+      required:
+        - reflection
+      properties:
+        id:
+          type: "string"
+        reflection:
+          type: "string"
+    User:
+      type: "object"
+      required:
+        - first_name
+        - last_name
+        - created_on
+        - modified_on
+      properties:
+        first_name:
+          type: "string"
+        last_name:
+          type: "string"
+        created_on:
+          type: "string"
+        modified_on:
+          type: "string"
+
+paths:
+  /users:
+    get:
+      operationId: "users.read_all"
+      tags:
+        - "Users"
+      summary: "Return the list of users"
+      responses:
+        "200":
+          description: "Successfully read list of users"
+  /words:
+    get:
+      operationId: "words.get_all"
+      tags:
+        - "Words"
+      summary: "Return the list of words"
+      responses:
+        "200":
+          description: "Successfully read list of words"
+    post:
+      operationId: "words.create"
+      tags:
+        - "Words"
+      summary: "Create a new word"
+      requestBody:
+        description: "Word to create"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "word"
+              $ref: "#/components/schemas/Word"
+      responses:
+        "200":
+          description: "Successfully created word"
+  /words/{id}:
+    get:
+      operationId: "words.get"
+      tags:
+        - "Words"
+      summary: "Return an individual word by id"
+      responses:
+        "200":
+          description: "Successfully retrieved word"
+    put:
+      operationId: "words.update"
+      tags:
+        - "Words"
+      summary: "Update an existing word"
+      requestBody:
+        description: "Word to update"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "word"
+              $ref: "#/components/schemas/Word"
+      responses:
+        "200":
+          description: "Successfully updated word"
