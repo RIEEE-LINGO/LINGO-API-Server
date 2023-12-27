@@ -18,6 +18,15 @@ components:
           type: "string"
         word:
           type: "string"
+    Meaning:
+      type: "object"
+      required:
+        - meaning
+      properties:
+        id:
+          type: "string"
+        meaning:
+          type: "string"
     Reflection:
       type: "object"
       required:
@@ -32,6 +41,7 @@ components:
       required:
         - first_name
         - last_name
+        - email
         - created_on
         - modified_on
       properties:
@@ -47,7 +57,7 @@ components:
 paths:
   /users:
     get:
-      operationId: "users.read_all"
+      operationId: "users.get_all"
       tags:
         - "Users"
       summary: "Return the list of users"
@@ -104,3 +114,53 @@ paths:
       responses:
         "200":
           description: "Successfully updated word"
+  /words/{word_id}/meanings:
+    get:
+      operationId: "meanings.get_all"
+      tags:
+        - "Meanings"
+      summary: "Return the list of meanings for a word"
+      responses:
+        "200":
+          description: "Successfully read list of meanings"
+    post:
+      operationId: "meanings.create"
+      tags:
+        - "Meanings"
+      summary: "Create a new meaning for a word"
+      requestBody:
+        description: "Meaning to create"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "meaning"
+              $ref: "#/components/schemas/Meaning"
+      responses:
+        "200":
+          description: "Successfully created meaning for word"
+  /words/{word_id}/meanings/{id}:
+    get:
+      operationId: "meanings.get"
+      tags:
+        - "Meanings"
+      summary: "Return an individual meaning by id"
+      responses:
+        "200":
+          description: "Successfully retrieved meaning"
+    put:
+      operationId: "meanings.update"
+      tags:
+        - "Meanings"
+      summary: "Update an existing meaning"
+      requestBody:
+        description: "Meaning to update"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "meaning"
+              $ref: "#/components/schemas/Meaning"
+      responses:
+        "200":
+          description: "Successfully updated meaning"

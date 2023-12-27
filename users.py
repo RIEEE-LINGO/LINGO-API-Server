@@ -1,16 +1,39 @@
-from datetime import datetime
+from flask import abort
+from config import db
+from lingo.models import User, user_schema, users_schema
 
-def get_timestamp():
-    return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
+def get_all():
+    users = User.query.all()
+    return users_schema.dump(users)
 
-USERS = {
-    "1": {
-        "first": "Mark",
-        "last_name": "Hills",
-        "created_on": get_timestamp(),
-        "modified_on": get_timestamp(),
-    }
-}
+def get(id):
+    user = User.query.filter(User.id == id).one_or_none()
 
-def read_all():
-    return list(USERS.values())
+    if user is not None:
+        return user_schema.dump(user)
+    else:
+        abort(
+            404, f"User with id {id} not found"
+        )
+
+def create(user):
+    new_user = user_schema.load(user, session=db.session)
+    db.session.add(new_user)
+    db.session.commit()
+    return user_schema.dump(new_user), 201
+
+def update(id,user):
+    existing_user = User.query.filter(User.id == id).one_or_none()
+    if existing_user:
+        update_user = user_schema.load(user, session=db.session)
+        existing_user.first_name = update_user.first_name
+        existing_user.last_name = update_user.last_name
+        existing_user.email = update_user.email
+        db.session.merge(existing_user)
+        db.session.commit()
+        return user_schema.dump(existing_user), 201
+    else:
+        abort(
+            404,
+            f"User with id {id} not found"
+        )

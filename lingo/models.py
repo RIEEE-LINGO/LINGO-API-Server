@@ -1,38 +1,46 @@
 from datetime import datetime
 from config import db, ma
+from typing import Optional
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 class User(db.Model):
     __tablename__ = "user"
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String, nullable=True, unique=False)
-    last_name = db.Column(db.String, nullable=True, unique=False)
-    email = db.Column(db.String, nullable=False, unique=True)
-    created_at = db.Column(
-        db.DateTime, default=datetime.utcnow
+    id: Mapped[int] = mapped_column(primary_key=True)
+    first_name: Mapped[Optional[str]]
+    last_name: Mapped[Optional[str]]
+    email: Mapped[str] = mapped_column(unique=True)
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow
     )
-    updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    team_roles = db.relationship(
+    team_roles = relationship(
         "TeamMember",
         backref="user",
+        cascade="all, delete, delete-orphan",
+        single_parent=True
+    )
+    owned_projects = relationship(
+        "Project",
+        backref="owner",
         cascade="all, delete, delete-orphan",
         single_parent=True
     )
 
 class Project(db.Model):
     __tablename__ = "project"
-    id = db.Column(db.Integer, primary_key=True)
-    project_name = db.Column(db.String, nullable=False, unique=True)
-    project_owner_email = db.Column(db.String, nullable=False, unique=False)
-    is_active = db.Column(db.Boolean, nullable=False, default=True)
-    created_at = db.Column(
-        db.DateTime, default=datetime.utcnow
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_name: Mapped[str] = mapped_column(unique=True)
+    project_owner: Mapped[int] = mapped_column(db.ForeignKey("user.id"))
+    is_active: Mapped[bool] = mapped_column(default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow
     )
-    updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    teams = db.relationship(
+    teams = relationship(
         "Team",
         backref="project",
         cascade="all, delete, delete-orphan",
@@ -42,17 +50,17 @@ class Project(db.Model):
 
 class Team(db.Model):
     __tablename__ = "team"
-    id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, db.ForeignKey("project.id"))
-    team_name = db.Column(db.String, nullable=False, unique=False)
-    is_active = db.Column(db.Boolean, nullable=False, default=True)
-    created_at = db.Column(
-        db.DateTime, default=datetime.utcnow
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(db.ForeignKey("project.id"))
+    team_name: Mapped[str]
+    is_active: Mapped[bool] = mapped_column(default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow
     )
-    updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    team_members = db.relationship(
+    team_members = relationship(
         "TeamMember",
         backref="team",
         cascade="all, delete, delete-orphan",
@@ -62,36 +70,36 @@ class Team(db.Model):
 
 class TeamMember(db.Model):
     __tablename__ = "team_member"
-    id = db.Column(db.Integer, primary_key=True)
-    team_id = db.Column(db.Integer, db.ForeignKey("team.id"))
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    email = db.Column(db.String, nullable=False, unique=False)
-    is_owner = db.Column(db.Boolean, nullable=False, default=False)
-    created_at = db.Column(
-        db.DateTime, default=datetime.utcnow
+    id: Mapped[int] = mapped_column(primary_key=True)
+    team_id: Mapped[int] = mapped_column(db.ForeignKey("team.id"))
+    user_id: Mapped[int] = mapped_column(db.ForeignKey("user.id"))
+    email: Mapped[str]
+    is_owner: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow
     )
-    updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
 class Word(db.Model):
     __tablename__ = "word"
-    id = db.Column(db.Integer, primary_key=True)
-    word = db.Column(db.String, nullable=False, unique=False)
-    created_at = db.Column(
-        db.DateTime, default=datetime.utcnow
+    id: Mapped[int] = mapped_column(primary_key=True)
+    word: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow
     )
-    updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    meanings = db.relationship(
+    meanings = relationship(
         "Meaning",
         backref="word",
         cascade="all, delete, delete-orphan",
         single_parent=True,
         order_by="Meaning.created_at"
     )
-    reflections = db.relationship(
+    reflections = relationship(
         "Reflection",
         backref="word",
         cascade="all, delete, delete-orphan",
@@ -101,26 +109,26 @@ class Word(db.Model):
 
 class Meaning(db.Model):
     __tablename__ = "meaning"
-    id = db.Column(db.Integer, primary_key=True)
-    word_id = db.Column(db.Integer, db.ForeignKey("word.id"))
-    meaning = db.Column(db.String, nullable=False, unique=False)
-    created_at = db.Column(
-        db.DateTime, default=datetime.utcnow
+    id: Mapped[int] = mapped_column(primary_key=True)
+    word_id: Mapped[int] = mapped_column(db.ForeignKey("word.id"))
+    meaning: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow
     )
-    updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
 class Reflection(db.Model):
     __tablename__ = "reflection"
-    id = db.Column(db.Integer, primary_key=True)
-    word_id = db.Column(db.Integer, db.ForeignKey("word.id"))
-    reflection = db.Column(db.String, unique=False)
-    created_at = db.Column(
-        db.DateTime, default=datetime.utcnow
+    id: Mapped[int] = mapped_column(primary_key=True)
+    word_id: Mapped[int] = mapped_column(db.ForeignKey("word.id"))
+    reflection: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow
     )
-    updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
