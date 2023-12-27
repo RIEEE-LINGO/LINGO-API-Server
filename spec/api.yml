@@ -82,6 +82,15 @@ paths:
       responses:
         "200":
           description: "Successfully read list of users"
+  /users/{id}:
+    get:
+      operationId: "users.get"
+      tags:
+        - "Users"
+      summary: "Return an individual user by id"
+      responses:
+        "200":
+          description: "Successfully retrieved user"
   /projects:
     get:
       operationId: "projects.get_all"
@@ -91,6 +100,15 @@ paths:
       responses:
         "200":
           description: "Successfully read list of projects"
+  /projects/{id}:
+    get:
+      operationId: "projects.get"
+      tags:
+        - "Projects"
+      summary: "Return an individual project by id"
+      responses:
+        "200":
+          description: "Successfully retrieved project"
   /words:
     get:
       operationId: "words.get_all"
