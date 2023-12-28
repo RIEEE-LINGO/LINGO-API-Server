@@ -2,19 +2,21 @@ from flask import abort
 from config import db
 from lingo.models import Reflection, reflection_schema, reflections_schema
 
-def get_all():
-    words = Reflection.query.all()
-    return reflections_schema.dump(words)
+def get_all(word_id):
+    reflections_for_word = Reflection.query.filter(Reflection.word_id == word_id).all()
+    return reflections_schema.dump(reflections_for_word)
 
-def get(id):
-    reflection = Reflection.query.filter(Reflection.id == id).one_or_none()
+
+def get(word_id, reflection_id):
+    reflection = Reflection.query.filter(Reflection.word_id == word_id and Reflection.id == reflection_id).one_or_none()
 
     if reflection is not None:
         return reflection_schema.dump(reflection)
     else:
         abort(
-            404, f"Reflection with id {id} not found"
+            404, f"Reflection with id {reflection_id} for word with id {word_id} not found"
         )
+
 
 def create(reflection):
     new_reflection = reflection_schema.load(reflection, session=db.session)
@@ -22,8 +24,10 @@ def create(reflection):
     db.session.commit()
     return reflection_schema.dump(new_reflection), 201
 
-def update(id,reflection):
-    existing_reflection = Reflection.query.filter(Reflection.id == id).one_or_none()
+
+def update(word_id, reflection_id, reflection):
+    # TODO: It may make sense to check to ensure the word ID has not changed.
+    existing_reflection = Reflection.query.filter(Reflection.word_id == word_id and Reflection.id == reflection_id).one_or_none()
     if existing_reflection:
         update_reflection = reflection_schema.load(reflection, session=db.session)
         existing_reflection.reflection = update_reflection.reflection
@@ -32,6 +36,5 @@ def update(id,reflection):
         return reflection_schema.dump(existing_reflection), 201
     else:
         abort(
-            404,
-            f"Reflection with id {id} not found"
+            404, f"Reflection with id {reflection_id} for word with id {word_id} not found"
         )
