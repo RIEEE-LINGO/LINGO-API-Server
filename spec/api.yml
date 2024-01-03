@@ -82,9 +82,16 @@ paths:
       responses:
         "200":
           description: "Successfully read list of users"
-  /users/{id}:
+  /users/{user_id}:
     get:
       operationId: "users.get"
+      parameters:
+        - name: user_id
+          in: path
+          description: "ID of user to fetch"
+          required: true
+          schema:
+            type: integer
       tags:
         - "Users"
       summary: "Return an individual user by id"
@@ -100,9 +107,16 @@ paths:
       responses:
         "200":
           description: "Successfully read list of projects"
-  /projects/{id}:
+  /projects/{project_id}:
     get:
       operationId: "projects.get"
+      parameters:
+        - name: project_id
+          in: path
+          description: "ID of project to fetch"
+          required: true
+          schema:
+            type: integer
       tags:
         - "Projects"
       summary: "Return an individual project by id"
@@ -137,6 +151,13 @@ paths:
   /words/{word_id}:
     get:
       operationId: "words.get"
+      parameters:
+        - name: word_id
+          in: path
+          description: "ID of word to fetch"
+          required: true
+          schema:
+            type: integer
       tags:
         - "Words"
       summary: "Return an individual word by id"
@@ -162,6 +183,13 @@ paths:
   /words/{word_id}/meanings:
     get:
       operationId: "meanings.get_all"
+      parameters:
+        - name: word_id
+          in: path
+          description: "ID of word for meanings being fetched"
+          required: true
+          schema:
+            type: integer
       tags:
         - "Meanings"
       summary: "Return the list of meanings for a word"
@@ -184,9 +212,22 @@ paths:
       responses:
         "200":
           description: "Successfully created meaning for word"
-  /words/{word_id}/meanings/{id}:
+  /words/{word_id}/meanings/{meaning_id}:
     get:
       operationId: "meanings.get"
+      parameters:
+        - name: word_id
+          in: path
+          description: "ID of word for meanings being fetched"
+          required: true
+          schema:
+            type: integer
+        - name: meaning_id
+          in: path
+          description: "ID of meaning to fetch"
+          required: true
+          schema:
+            type: integer
       tags:
         - "Meanings"
       summary: "Return an individual meaning by id"
@@ -209,3 +250,73 @@ paths:
       responses:
         "200":
           description: "Successfully updated meaning"
+  /words/{word_id}/reflections:
+    get:
+      operationId: "reflections.get_all"
+      parameters:
+        - name: word_id
+          in: path
+          description: "ID of word for reflections being fetched"
+          required: true
+          schema:
+            type: integer
+      tags:
+        - "Reflections"
+      summary: "Return the list of reflections for a word"
+      responses:
+        "200":
+          description: "Successfully read list of reflections"
+    post:
+      operationId: "reflections.create"
+      tags:
+        - "Reflections"
+      summary: "Create a new reflection for a word"
+      requestBody:
+        description: "Reflection to create"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "reflection"
+              $ref: "#/components/schemas/Reflection"
+      responses:
+        "200":
+          description: "Successfully created reflection for word"
+  /words/{word_id}/reflections/{reflection_id}:
+    get:
+      operationId: "reflections.get"
+      parameters:
+        - name: word_id
+          in: path
+          description: "ID of word for reflections being fetched"
+          required: true
+          schema:
+            type: integer
+        - name: reflection_id
+          in: path
+          description: "ID of reflection to fetch"
+          required: true
+          schema:
+            type: integer
+      tags:
+        - "Reflections"
+      summary: "Return an individual reflection by id"
+      responses:
+        "200":
+          description: "Successfully retrieved reflection"
+    put:
+      operationId: "reflections.update"
+      tags:
+        - "Reflections"
+      summary: "Update an existing reflection"
+      requestBody:
+        description: "Reflection to update"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "reflection"
+              $ref: "#/components/schemas/Reflection"
+      responses:
+        "200":
+          description: "Successfully updated reflection"

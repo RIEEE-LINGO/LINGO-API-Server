@@ -2,19 +2,22 @@ from flask import abort
 from config import db
 from lingo.models import User, user_schema, users_schema
 
+
 def get_all():
     users = User.query.all()
     return users_schema.dump(users)
 
-def get(id):
-    user = User.query.filter(User.id == id).one_or_none()
+
+def get(user_id):
+    user = User.query.where(User.id == user_id).one_or_none()
 
     if user is not None:
         return user_schema.dump(user)
     else:
         abort(
-            404, f"User with id {id} not found"
+            404, f"User with id {user_id} not found"
         )
+
 
 def create(user):
     new_user = user_schema.load(user, session=db.session)
@@ -22,8 +25,9 @@ def create(user):
     db.session.commit()
     return user_schema.dump(new_user), 201
 
-def update(id,user):
-    existing_user = User.query.filter(User.id == id).one_or_none()
+
+def update(user_id, user):
+    existing_user = User.query.where(User.id == user_id).one_or_none()
     if existing_user:
         update_user = user_schema.load(user, session=db.session)
         existing_user.first_name = update_user.first_name
@@ -35,5 +39,5 @@ def update(id,user):
     else:
         abort(
             404,
-            f"User with id {id} not found"
+            f"User with id {user_id} not found"
         )

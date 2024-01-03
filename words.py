@@ -9,7 +9,7 @@ def get_all():
 
 
 def get(word_id):
-    word = Word.query.filter(Word.id == word_id).one_or_none()
+    word = Word.query.where(Word.id == word_id).one_or_none()
 
     if word is not None:
         return word_schema.dump(word)
@@ -27,7 +27,7 @@ def create(word):
 
 
 def update(word_id, word):
-    existing_word = Word.query.filter(Word.id == word_id).one_or_none()
+    existing_word = Word.query.where(Word.id == word_id).one_or_none()
     if existing_word:
         update_word = word_schema.load(word, session=db.session)
         existing_word.word = update_word.word
@@ -42,7 +42,7 @@ def update(word_id, word):
 
 
 def delete(word_id):
-    existing_word = Word.query.filter(Word.id == word_id).one_or_none()
+    existing_word = Word.query.where(Word.id == word_id).one_or_none()
     if existing_word:
         word_schema.delete(existing_word)
         return True

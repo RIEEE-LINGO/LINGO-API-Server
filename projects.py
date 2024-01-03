@@ -2,19 +2,22 @@ from flask import abort
 from config import db
 from lingo.models import Project, project_schema, projects_schema
 
+
 def get_all():
     projects = Project.query.all()
     return projects_schema.dump(projects)
 
-def get(id):
-    project = Project.query.filter(Project.id == id).one_or_none()
+
+def get(project_id):
+    project = Project.query.where(Project.id == project_id).one_or_none()
 
     if project is not None:
         return project_schema.dump(project)
     else:
         abort(
-            404, f"Project with id {id} not found"
+            404, f"Project with id {project_id} not found"
         )
+
 
 def create(project):
     new_project = project_schema.load(project, session=db.session)
@@ -22,8 +25,9 @@ def create(project):
     db.session.commit()
     return project_schema.dump(new_project), 201
 
-def update(id,project):
-    existing_project = Project.query.filter(Project.id == id).one_or_none()
+
+def update(project_id, project):
+    existing_project = Project.query.where(Project.id == project_id).one_or_none()
     if existing_project:
         update_project = project_schema.load(project, session=db.session)
         existing_project.project_name = update_project.project_name
@@ -35,5 +39,5 @@ def update(id,project):
     else:
         abort(
             404,
-            f"Project with id {id} not found"
+            f"Project with id {project_id} not found"
         )

@@ -4,12 +4,12 @@ from lingo.models import Meaning, meaning_schema, meanings_schema
 
 
 def get_all(word_id):
-    meanings_for_word = Meaning.query.filter(Meaning.word_id == word_id).all()
+    meanings_for_word = Meaning.query.where(Meaning.word_id == word_id).all()
     return meanings_schema.dump(meanings_for_word)
 
 
 def get(word_id, meaning_id):
-    meaning = Meaning.query.filter(Meaning.word_id == word_id and Meaning.id == meaning_id).one_or_none()
+    meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
 
     if meaning is not None:
         return meaning_schema.dump(meaning)
@@ -28,7 +28,7 @@ def create(meaning):
 
 def update(word_id, meaning_id, meaning):
     # TODO: It may make sense to check to ensure the word ID has not changed.
-    existing_meaning = Meaning.query.filter(Meaning.word_id == word_id and Meaning.id == meaning_id).one_or_none()
+    existing_meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
     if existing_meaning:
         update_meaning = meaning_schema.load(meaning, session=db.session)
         existing_meaning.meaning = update_meaning.meaning
@@ -42,7 +42,7 @@ def update(word_id, meaning_id, meaning):
 
 
 def delete(word_id, meaning_id):
-    existing_meaning = Meaning.query.filter(Meaning.word_id == word_id and Meaning.id == meaning_id).one_or_none()
+    existing_meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
     if existing_meaning:
         meaning_schema.delete(existing_meaning)
         return True
