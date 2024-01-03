@@ -39,3 +39,14 @@ def update(word_id, meaning_id, meaning):
         abort(
             404, f"Meaning with id {meaning_id} for word with id {word_id} not found"
         )
+
+
+def delete(word_id, meaning_id):
+    existing_meaning = Meaning.query.filter(Meaning.word_id == word_id and Meaning.id == meaning_id).one_or_none()
+    if existing_meaning:
+        meaning_schema.delete(existing_meaning)
+        return True
+    else:
+        abort(
+            404, f"Meaning with id {meaning_id} for word with id {word_id} not found"
+        )

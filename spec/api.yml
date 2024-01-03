@@ -134,7 +134,7 @@ paths:
       responses:
         "200":
           description: "Successfully created word"
-  /words/{id}:
+  /words/{word_id}:
     get:
       operationId: "words.get"
       tags:

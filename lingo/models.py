@@ -3,6 +3,7 @@ from config import db, ma
 from typing import Optional
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
+
 class User(db.Model):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -28,6 +29,7 @@ class User(db.Model):
         single_parent=True
     )
 
+
 class Project(db.Model):
     __tablename__ = "project"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -47,6 +49,14 @@ class Project(db.Model):
         single_parent=True,
         order_by="Team.team_name"
     )
+    words = relationship(
+        "Word",
+        backref="project",
+        cascade="all, delete, delete-orphan",
+        single_parent=True,
+        order_by="Word.word"
+    )
+
 
 class Team(db.Model):
     __tablename__ = "team"
@@ -68,6 +78,7 @@ class Team(db.Model):
         order_by="TeamMember.email"
     )
 
+
 class TeamMember(db.Model):
     __tablename__ = "team_member"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -82,10 +93,12 @@ class TeamMember(db.Model):
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
+
 class Word(db.Model):
     __tablename__ = "word"
     id: Mapped[int] = mapped_column(primary_key=True)
     word: Mapped[str]
+    project_id: Mapped[int] = mapped_column(db.ForeignKey("project.id"))
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
     )
@@ -107,6 +120,7 @@ class Word(db.Model):
         order_by="Reflection.created_at"
     )
 
+
 class Meaning(db.Model):
     __tablename__ = "meaning"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -118,6 +132,7 @@ class Meaning(db.Model):
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
+
 
 class Reflection(db.Model):
     __tablename__ = "reflection"
@@ -131,12 +146,14 @@ class Reflection(db.Model):
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
+
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         load_instance = True
         sqla_session = db.session
         include_relationships = True
+
 
 class ProjectSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -145,12 +162,14 @@ class ProjectSchema(ma.SQLAlchemyAutoSchema):
         sqla_session = db.session
         include_relationships = True
 
+
 class TeamSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Team
         load_instance = True
         sqla_session = db.session
         include_relationships = True
+
 
 class TeamMemberSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -159,12 +178,14 @@ class TeamMemberSchema(ma.SQLAlchemyAutoSchema):
         sqla_session = db.session
         include_relationships = True
 
+
 class WordSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Word
         load_instance = True
         sqla_session = db.session
         include_relationships = True
+
 
 class MeaningSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -173,12 +194,14 @@ class MeaningSchema(ma.SQLAlchemyAutoSchema):
         sqla_session = db.session
         include_fk = True
 
+
 class ReflectionSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Reflection
         load_instance = True
         sqla_session = db.session
         include_fk = True
+
 
 user_schema = UserSchema()
 project_schema = ProjectSchema()

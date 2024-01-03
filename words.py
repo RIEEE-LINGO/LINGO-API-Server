@@ -39,3 +39,15 @@ def update(word_id, word):
             404,
             f"Word with id {word_id} not found"
         )
+
+
+def delete(word_id):
+    existing_word = Word.query.filter(Word.id == word_id).one_or_none()
+    if existing_word:
+        word_schema.delete(existing_word)
+        return True
+    else:
+        abort(
+            404,
+            f"Word with id {word_id} not found"
+        )
