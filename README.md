@@ -12,13 +12,13 @@ source .venv/bin/activate
 ```
 while on Windows, it is:
 ```angular2html
-.venv\bin\activate
+.venv\Scripts\activate
 ```
 
 Now, install any requirements using `pip`. This will just install the requirements
 into the local directories:
 ```angular2html
-pip -r requirements.txt
+pip install -r requirements.txt
 ```
 
 # Creating the Database
@@ -27,8 +27,10 @@ To start, you should create a database and add sample data. To do this, you
 should run python (while in the virtual environment) and run the script
 which does this (note that, on the first line, `$` is the prompt, not part
 of the command you type, similarly `>>>` is the prompt inside the Python
-interpreter):
+interpreter). Note that you need to create the `db` directory first since
+Python will not do this for you:
 ```angular2html
+$ mkdir db
 $ python
 Python 3.9.13 (main, Aug 25 2022, 18:29:29) 
 [Clang 12.0.0 ] :: Anaconda, Inc. on darwin
