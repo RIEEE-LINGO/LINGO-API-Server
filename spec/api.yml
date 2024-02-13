@@ -37,9 +37,11 @@ components:
         - reflection
       properties:
         id:
-          type: "string"
+          type: "integer"
         reflection:
           type: "string"
+        active:
+          type: "boolean"
     User:
       type: "object"
       required:
@@ -315,6 +317,12 @@ paths:
           required: true
           schema:
             type: integer
+        - in: query
+          name: filter
+          schema:
+            type: string
+            enum: [all, onlyActive, onlyDeleted]
+          required: false
       tags:
         - "Reflections"
       summary: "Return the list of reflections for a word"
@@ -375,3 +383,24 @@ paths:
       responses:
         "200":
           description: "Successfully updated reflection"
+    delete:
+      operationId: "reflections.delete"
+      parameters:
+        - name: word_id
+          in: path
+          description: "ID of word for reflection being deleted"
+          required: true
+          schema:
+            type: integer
+        - name: reflection_id
+          in: path
+          description: "ID of reflection to delete"
+          required: true
+          schema:
+            type: integer
+      tags:
+        - "Reflections"
+      summary: "Delete an individual reflection by id"
+      responses:
+        "200":
+          description: "Successfully deleted reflection"
