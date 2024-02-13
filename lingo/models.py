@@ -99,6 +99,7 @@ class Word(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     word: Mapped[str]
     project_id: Mapped[int] = mapped_column(db.ForeignKey("project.id"))
+    active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
     )
@@ -126,6 +127,7 @@ class Meaning(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     word_id: Mapped[int] = mapped_column(db.ForeignKey("word.id"))
     meaning: Mapped[str]
+    active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
     )
@@ -139,6 +141,7 @@ class Reflection(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     word_id: Mapped[int] = mapped_column(db.ForeignKey("word.id"))
     reflection: Mapped[str]
+    active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
     )
