@@ -26,9 +26,11 @@ components:
         - meaning
       properties:
         id:
-          type: "string"
+          type: "integer"
         meaning:
           type: "string"
+        active:
+          type: "boolean"
     Reflection:
       type: "object"
       required:
@@ -216,6 +218,12 @@ paths:
           required: true
           schema:
             type: integer
+        - in: query
+          name: filter
+          schema:
+            type: string
+            enum: [all, onlyActive, onlyDeleted]
+          required: false
       tags:
         - "Meanings"
       summary: "Return the list of meanings for a word"
@@ -276,6 +284,27 @@ paths:
       responses:
         "200":
           description: "Successfully updated meaning"
+    delete:
+      operationId: "meanings.delete"
+      parameters:
+        - name: word_id
+          in: path
+          description: "ID of word for meaning being deleted"
+          required: true
+          schema:
+            type: integer
+        - name: meaning_id
+          in: path
+          description: "ID of meaning to delete"
+          required: true
+          schema:
+            type: integer
+      tags:
+        - "Meanings"
+      summary: "Delete an individual meaning by id"
+      responses:
+        "200":
+          description: "Successfully deleted meaning"
   /words/{word_id}/reflections:
     get:
       operationId: "reflections.get_all"

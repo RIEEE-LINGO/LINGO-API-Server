@@ -3,9 +3,16 @@ from config import db
 from lingo.models import Meaning, meaning_schema, meanings_schema
 
 
-def get_all(word_id):
-    meanings_for_word = Meaning.query.where(Meaning.word_id == word_id).all()
-    return meanings_schema.dump(meanings_for_word)
+def get_all(word_id, filter = "onlyActive"):
+    if filter.lower() == "onlyactive":
+        meanings_for_word = Meaning.query.where(Meaning.word_id == word_id, Meaning.active == True).all()
+        return meanings_schema.dump(meanings_for_word)
+    elif filter.lower() == "onlydeleted":
+        meanings_for_word = Meaning.query.where(Meaning.word_id == word_id, Meaning.active == False).all()
+        return meanings_schema.dump(meanings_for_word)
+    else:
+        meanings_for_word = Meaning.query.where(Meaning.word_id == word_id).all()
+        return meanings_schema.dump(meanings_for_word)
 
 
 def get(word_id, meaning_id):
@@ -44,7 +51,9 @@ def update(word_id, meaning_id, meaning):
 def delete(word_id, meaning_id):
     existing_meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
     if existing_meaning:
-        meaning_schema.delete(existing_meaning)
+        existing_meaning.active = False
+        db.session.merge(existing_meaning)
+        db.session.commit()
         return True
     else:
         abort(
