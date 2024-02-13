@@ -22,7 +22,8 @@ def get(word_id, meaning_id):
         return meaning_schema.dump(meaning)
     else:
         abort(
-            404, f"Meaning with id {meaning_id} for word with id {word_id} not found"
+            404, 
+            f"Meaning with id {meaning_id} for word with id {word_id} not found"
         )
 
 
@@ -34,17 +35,20 @@ def create(meaning):
 
 
 def update(word_id, meaning_id, meaning):
+    
     # TODO: It may make sense to check to ensure the word ID has not changed.
     existing_meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
     if existing_meaning:
+        print(f"{existing_meaning.active}")
         update_meaning = meaning_schema.load(meaning, session=db.session)
-        existing_meaning.meaning = update_meaning.meaning
+        print(f"{existing_meaning.active}")
         db.session.merge(existing_meaning)
         db.session.commit()
         return meaning_schema.dump(existing_meaning), 201
     else:
         abort(
-            404, f"Meaning with id {meaning_id} for word with id {word_id} not found"
+            404, 
+            f"Meaning with id {meaning_id} for word with id {word_id} not found"
         )
 
 
@@ -57,5 +61,6 @@ def delete(word_id, meaning_id):
         return True
     else:
         abort(
-            404, f"Meaning with id {meaning_id} for word with id {word_id} not found"
+            404, 
+            f"Meaning with id {meaning_id} for word with id {word_id} not found"
         )
