@@ -15,9 +15,11 @@ components:
         - word
       properties:
         id:
-          type: "string"
+          type: "integer"
         word:
           type: "string"
+        active:
+          type: "boolean"
     Meaning:
       type: "object"
       required:
@@ -72,6 +74,7 @@ components:
           type: "string"
         modified_on:
           type: "string"
+
 paths:
   /users:
     get:
@@ -126,6 +129,13 @@ paths:
   /words:
     get:
       operationId: "words.get_all"
+      parameters:
+        - in: query
+          name: filter
+          schema:
+            type: string
+            enum: [all, onlyActive, onlyDeleted]
+          required: false
       tags:
         - "Words"
       summary: "Return the list of words"
@@ -180,6 +190,22 @@ paths:
       responses:
         "200":
           description: "Successfully updated word"
+    delete:
+      operationId: "words.delete"
+      parameters:
+        - name: word_id
+          in: path
+          description: "ID of word to delete"
+          required: true
+          schema:
+            type: integer
+      tags:
+        - "Words"
+      summary: "Delete an individual word by id"
+      responses:
+        "200":
+          description: "Successfully deleted word"
+
   /words/{word_id}/meanings:
     get:
       operationId: "meanings.get_all"

@@ -3,9 +3,16 @@ from config import db
 from lingo.models import Word, word_schema, words_schema
 
 
-def get_all():
-    words = Word.query.all()
-    return words_schema.dump(words)
+def get_all(filter = "onlyActive"):
+    if filter.lower() == "onlyactive":
+        words = Word.query.where(Word.active == True).all()
+        return words_schema.dump(words)
+    elif filter.lower() == "onlydeleted":
+        words = Word.query.where(Word.active == False).all()
+        return words_schema.dump(words)
+    else:
+        words = Word.query.all()
+        return words_schema.dump(words)
 
 
 def get(word_id):
@@ -31,6 +38,7 @@ def update(word_id, word):
     if existing_word:
         update_word = word_schema.load(word, session=db.session)
         existing_word.word = update_word.word
+        existing_word.active = update_word.active
         db.session.merge(existing_word)
         db.session.commit()
         return word_schema.dump(existing_word), 201
@@ -44,7 +52,9 @@ def update(word_id, word):
 def delete(word_id):
     existing_word = Word.query.where(Word.id == word_id).one_or_none()
     if existing_word:
-        word_schema.delete(existing_word)
+        existing_word.active = False
+        db.session.merge(existing_word)
+        db.session.commit()
         return True
     else:
         abort(
