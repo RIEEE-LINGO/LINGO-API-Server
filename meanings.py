@@ -39,9 +39,7 @@ def update(word_id, meaning_id, meaning):
     # TODO: It may make sense to check to ensure the word ID has not changed.
     existing_meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
     if existing_meaning:
-        print(f"{existing_meaning.active}")
         update_meaning = meaning_schema.load(meaning, session=db.session)
-        print(f"{existing_meaning.active}")
         db.session.merge(existing_meaning)
         db.session.commit()
         return meaning_schema.dump(existing_meaning), 201
