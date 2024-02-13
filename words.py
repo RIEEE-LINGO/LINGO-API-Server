@@ -37,8 +37,6 @@ def update(word_id, word):
     existing_word = Word.query.where(Word.id == word_id).one_or_none()
     if existing_word:
         update_word = word_schema.load(word, session=db.session)
-        existing_word.word = update_word.word
-        existing_word.active = update_word.active
         db.session.merge(existing_word)
         db.session.commit()
         return word_schema.dump(existing_word), 201
