@@ -1,5 +1,5 @@
 from flask import abort
-from config import db
+from config import enable_api_security, db
 from lingo.models import User, user_schema, users_schema
 
 

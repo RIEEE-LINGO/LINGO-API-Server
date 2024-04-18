@@ -1,21 +1,24 @@
 from flask import abort
-from config import db
+from config import enable_api_security, db
 from lingo.models import Meaning, meaning_schema, meanings_schema
-from utils import get_current_user
-
-def check_meaning_security(user):
-    if not user:
-        abort(
-            401,
-            "Unauthorized"
-        )
-
-    # Add other rules for user checking here
-    # TODO
+from utils.utils import get_current_user
 
 
-def get_all(word_id, filter = "onlyActive"):
-    check_meaning_security(get_current_user())
+def check_meaning_security():
+    if enable_api_security:
+        user = get_current_user()
+        if not user:
+            abort(
+                401,
+                "Unauthorized"
+            )
+
+        # Add other rules for user checking here
+        # TODO
+
+
+def get_all(word_id, filter="onlyActive"):
+    check_meaning_security()
 
     if filter.lower() == "onlyactive":
         meanings_for_word = Meaning.query.where(Meaning.word_id == word_id, Meaning.active == True).all()
@@ -29,7 +32,7 @@ def get_all(word_id, filter = "onlyActive"):
 
 
 def get(word_id, meaning_id):
-    check_meaning_security(get_current_user())
+    check_meaning_security()
 
     meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
 
@@ -37,14 +40,16 @@ def get(word_id, meaning_id):
         return meaning_schema.dump(meaning)
     else:
         abort(
-            404, 
+            404,
             f"Meaning with id {meaning_id} for word with id {word_id} not found"
         )
 
 
-def create(meaning):
-    check_meaning_security(get_current_user())
+def create(word_id, meaning):
+    check_meaning_security()
 
+    if "word_id" not in meaning:
+        meaning["word_id"] = word_id
     new_meaning = meaning_schema.load(meaning, session=db.session)
     db.session.add(new_meaning)
     db.session.commit()
@@ -52,7 +57,7 @@ def create(meaning):
 
 
 def update(word_id, meaning_id, meaning):
-    check_meaning_security(get_current_user())
+    check_meaning_security()
 
     # TODO: It may make sense to check to ensure the word ID has not changed.
     existing_meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
@@ -63,13 +68,13 @@ def update(word_id, meaning_id, meaning):
         return meaning_schema.dump(existing_meaning), 201
     else:
         abort(
-            404, 
+            404,
             f"Meaning with id {meaning_id} for word with id {word_id} not found"
         )
 
 
 def delete(word_id, meaning_id):
-    check_meaning_security(get_current_user())
+    check_meaning_security()
 
     existing_meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
     if existing_meaning:
@@ -79,6 +84,6 @@ def delete(word_id, meaning_id):
         return True
     else:
         abort(
-            404, 
+            404,
             f"Meaning with id {meaning_id} for word with id {word_id} not found"
         )

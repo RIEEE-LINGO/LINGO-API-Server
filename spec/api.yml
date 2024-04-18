@@ -82,7 +82,7 @@ components:
 paths:
   /users:
     get:
-      operationId: "users.get_all"
+      operationId: "api.users.get_all"
       tags:
         - "Users"
       summary: "Return the list of users"
@@ -91,7 +91,7 @@ paths:
           description: "Successfully read list of users"
   /users/{user_id}:
     get:
-      operationId: "users.get"
+      operationId: "api.users.get"
       parameters:
         - name: user_id
           in: path
@@ -107,7 +107,7 @@ paths:
           description: "Successfully retrieved user"
   /projects:
     get:
-      operationId: "projects.get_all"
+      operationId: "api.projects.get_all"
       tags:
         - "Projects"
       summary: "Return the list of projects"
@@ -116,7 +116,7 @@ paths:
           description: "Successfully read list of projects"
   /projects/{project_id}:
     get:
-      operationId: "projects.get"
+      operationId: "api.projects.get"
       parameters:
         - name: project_id
           in: path
@@ -132,7 +132,7 @@ paths:
           description: "Successfully retrieved project"
   /words:
     get:
-      operationId: "words.get_all"
+      operationId: "api.words.get_all"
       parameters:
         - in: query
           name: filter
@@ -147,7 +147,7 @@ paths:
         "200":
           description: "Successfully read list of words"
     post:
-      operationId: "words.create"
+      operationId: "api.words.create"
       tags:
         - "Words"
       summary: "Create a new word"
@@ -164,7 +164,7 @@ paths:
           description: "Successfully created word"
   /words/{word_id}:
     get:
-      operationId: "words.get"
+      operationId: "api.words.get"
       parameters:
         - name: word_id
           in: path
@@ -179,7 +179,7 @@ paths:
         "200":
           description: "Successfully retrieved word"
     put:
-      operationId: "words.update"
+      operationId: "api.words.update"
       tags:
         - "Words"
       summary: "Update an existing word"
@@ -195,7 +195,7 @@ paths:
         "200":
           description: "Successfully updated word"
     delete:
-      operationId: "words.delete"
+      operationId: "api.words.delete"
       parameters:
         - name: word_id
           in: path
@@ -212,7 +212,7 @@ paths:
 
   /words/{word_id}/meanings:
     get:
-      operationId: "meanings.get_all"
+      operationId: "api.meanings.get_all"
       parameters:
         - name: word_id
           in: path
@@ -233,7 +233,7 @@ paths:
         "200":
           description: "Successfully read list of meanings"
     post:
-      operationId: "meanings.create"
+      operationId: "api.meanings.create"
       tags:
         - "Meanings"
       summary: "Create a new meaning for a word"
@@ -250,7 +250,7 @@ paths:
           description: "Successfully created meaning for word"
   /words/{word_id}/meanings/{meaning_id}:
     get:
-      operationId: "meanings.get"
+      operationId: "api.meanings.get"
       parameters:
         - name: word_id
           in: path
@@ -271,7 +271,7 @@ paths:
         "200":
           description: "Successfully retrieved meaning"
     put:
-      operationId: "meanings.update"
+      operationId: "api.meanings.update"
       tags:
         - "Meanings"
       summary: "Update an existing meaning"
@@ -287,7 +287,7 @@ paths:
         "200":
           description: "Successfully updated meaning"
     delete:
-      operationId: "meanings.delete"
+      operationId: "api.meanings.delete"
       parameters:
         - name: word_id
           in: path
@@ -309,7 +309,7 @@ paths:
           description: "Successfully deleted meaning"
   /words/{word_id}/reflections:
     get:
-      operationId: "reflections.get_all"
+      operationId: "api.reflections.get_all"
       parameters:
         - name: word_id
           in: path
@@ -330,7 +330,7 @@ paths:
         "200":
           description: "Successfully read list of reflections"
     post:
-      operationId: "reflections.create"
+      operationId: "api.reflections.create"
       tags:
         - "Reflections"
       summary: "Create a new reflection for a word"
@@ -347,7 +347,7 @@ paths:
           description: "Successfully created reflection for word"
   /words/{word_id}/reflections/{reflection_id}:
     get:
-      operationId: "reflections.get"
+      operationId: "api.reflections.get"
       parameters:
         - name: word_id
           in: path
@@ -368,7 +368,7 @@ paths:
         "200":
           description: "Successfully retrieved reflection"
     put:
-      operationId: "reflections.update"
+      operationId: "api.reflections.update"
       tags:
         - "Reflections"
       summary: "Update an existing reflection"
@@ -384,7 +384,7 @@ paths:
         "200":
           description: "Successfully updated reflection"
     delete:
-      operationId: "reflections.delete"
+      operationId: "api.reflections.delete"
       parameters:
         - name: word_id
           in: path

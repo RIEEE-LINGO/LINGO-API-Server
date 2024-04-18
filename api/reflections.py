@@ -1,21 +1,24 @@
 from flask import abort
-from config import db
+from config import enable_api_security, db
 from lingo.models import Reflection, reflection_schema, reflections_schema
-from utils import get_current_user
-
-def check_reflection_security(user):
-    if not user:
-        abort(
-            401,
-            "Unauthorized"
-        )
-
-    # Add other rules for user checking here
-    # TODO
+from utils.utils import get_current_user
 
 
-def get_all(word_id, filter = "onlyActive"):
-    check_reflection_security(get_current_user())
+def check_reflection_security():
+    if enable_api_security:
+        user = get_current_user()
+        if not user:
+            abort(
+                401,
+                "Unauthorized"
+            )
+
+        # Add other rules for user checking here
+        # TODO
+
+
+def get_all(word_id, filter="onlyActive"):
+    check_reflection_security()
 
     if filter.lower() == "onlyactive":
         reflections_for_word = Reflection.query.where(Reflection.word_id == word_id, Reflection.active == True).all()
@@ -29,7 +32,7 @@ def get_all(word_id, filter = "onlyActive"):
 
 
 def get(word_id, reflection_id):
-    check_reflection_security(get_current_user())
+    check_reflection_security()
 
     reflection = Reflection.query.where(Reflection.id == reflection_id, Reflection.word_id == word_id).one_or_none()
 
@@ -42,9 +45,11 @@ def get(word_id, reflection_id):
         )
 
 
-def create(reflection):
-    check_reflection_security(get_current_user())
+def create(word_id, reflection):
+    check_reflection_security()
 
+    if "word_id" not in reflection:
+        reflection["word_id"] = word_id
     new_reflection = reflection_schema.load(reflection, session=db.session)
     db.session.add(new_reflection)
     db.session.commit()
@@ -52,10 +57,11 @@ def create(reflection):
 
 
 def update(word_id, reflection_id, reflection):
-    check_reflection_security(get_current_user())
+    check_reflection_security()
 
     # TODO: It may make sense to check to ensure the word ID has not changed.
-    existing_reflection = Reflection.query.where(Reflection.id == reflection_id, Reflection.word_id == word_id).one_or_none()
+    existing_reflection = Reflection.query.where(Reflection.id == reflection_id,
+                                                 Reflection.word_id == word_id).one_or_none()
     if existing_reflection:
         update_reflection = reflection_schema.load(reflection, session=db.session)
         db.session.merge(existing_reflection)
@@ -69,9 +75,10 @@ def update(word_id, reflection_id, reflection):
 
 
 def delete(word_id, reflection_id):
-    check_reflection_security(get_current_user())
+    check_reflection_security()
 
-    existing_reflection = Reflection.query.where(Reflection.id == reflection_id, Reflection.word_id == word_id).one_or_none()
+    existing_reflection = Reflection.query.where(Reflection.id == reflection_id,
+                                                 Reflection.word_id == word_id).one_or_none()
     if existing_reflection:
         existing_reflection.active = False
         db.session.merge(existing_reflection)

@@ -1,22 +1,24 @@
 from flask import abort
-from config import db
+from config import enable_api_security, db
 from lingo.models import Word, word_schema, words_schema
-from utils import get_current_user
+from utils.utils import get_current_user
 
 
-def check_word_security(user):
-    if not user:
-        abort(
-            401,
-            "Unauthorized"
-        )
+def check_word_security():
+    if enable_api_security:
+        user = get_current_user()
+        if not user:
+            abort(
+                401,
+                "Unauthorized"
+            )
 
-    # Add other rules for user checking here
-    # TODO
+        # Add other rules for user checking here
+        # TODO
 
 
 def get_all(filter = "onlyActive"):
-    check_word_security(get_current_user())
+    check_word_security()
 
     if filter.lower() == "onlyactive":
         words = Word.query.where(Word.active == True).all()
@@ -30,7 +32,7 @@ def get_all(filter = "onlyActive"):
 
 
 def get(word_id):
-    check_word_security(get_current_user())
+    check_word_security()
 
     word = Word.query.where(Word.id == word_id).one_or_none()
 
@@ -43,7 +45,7 @@ def get(word_id):
 
 
 def create(word):
-    check_word_security(get_current_user())
+    check_word_security()
 
     new_word = word_schema.load(word, session=db.session)
     db.session.add(new_word)
@@ -52,7 +54,7 @@ def create(word):
 
 
 def update(word_id, word):
-    check_word_security(get_current_user())
+    check_word_security()
 
     existing_word = Word.query.where(Word.id == word_id).one_or_none()
     if existing_word:
@@ -68,7 +70,7 @@ def update(word_id, word):
 
 
 def delete(word_id):
-    check_word_security(get_current_user())
+    check_word_security()
 
     existing_word = Word.query.where(Word.id == word_id).one_or_none()
     if existing_word:
