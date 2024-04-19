@@ -1,15 +1,22 @@
 from datetime import datetime
 from config import db, ma
 from typing import Optional
+from sqlalchemy import String
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 
 class User(db.Model):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True)
-    first_name: Mapped[Optional[str]]
-    last_name: Mapped[Optional[str]]
-    email: Mapped[str] = mapped_column(unique=True)
+    first_name: Mapped[Optional[str]] = mapped_column(
+        String(50)
+    )
+    last_name: Mapped[Optional[str]] = mapped_column(
+        String(50)
+    )
+    email: Mapped[str] = mapped_column(
+        String(50), unique=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
     )
@@ -33,7 +40,9 @@ class User(db.Model):
 class Project(db.Model):
     __tablename__ = "project"
     id: Mapped[int] = mapped_column(primary_key=True)
-    project_name: Mapped[str] = mapped_column(unique=True)
+    project_name: Mapped[str] = mapped_column(
+        String(50), unique=True
+    )
     project_owner: Mapped[int] = mapped_column(db.ForeignKey("user.id"))
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -62,7 +71,9 @@ class Team(db.Model):
     __tablename__ = "team"
     id: Mapped[int] = mapped_column(primary_key=True)
     project_id: Mapped[int] = mapped_column(db.ForeignKey("project.id"))
-    team_name: Mapped[str]
+    team_name: Mapped[str] = mapped_column(
+        String(50)
+    )
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
@@ -84,7 +95,9 @@ class TeamMember(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     team_id: Mapped[int] = mapped_column(db.ForeignKey("team.id"))
     user_id: Mapped[int] = mapped_column(db.ForeignKey("user.id"))
-    email: Mapped[str]
+    email: Mapped[str] = mapped_column(
+        String(50)
+    )
     is_owner: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
@@ -97,7 +110,9 @@ class TeamMember(db.Model):
 class Word(db.Model):
     __tablename__ = "word"
     id: Mapped[int] = mapped_column(primary_key=True)
-    word: Mapped[str]
+    word: Mapped[str] = mapped_column(
+        String(50)
+    )
     project_id: Mapped[int] = mapped_column(db.ForeignKey("project.id"))
     active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -126,7 +141,9 @@ class Meaning(db.Model):
     __tablename__ = "meaning"
     id: Mapped[int] = mapped_column(primary_key=True)
     word_id: Mapped[int] = mapped_column(db.ForeignKey("word.id"))
-    meaning: Mapped[str]
+    meaning: Mapped[str] = mapped_column(
+        String(1000)
+    )
     active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
@@ -140,7 +157,9 @@ class Reflection(db.Model):
     __tablename__ = "reflection"
     id: Mapped[int] = mapped_column(primary_key=True)
     word_id: Mapped[int] = mapped_column(db.ForeignKey("word.id"))
-    reflection: Mapped[str]
+    reflection: Mapped[str] = mapped_column(
+        String(1000)
+    )
     active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow

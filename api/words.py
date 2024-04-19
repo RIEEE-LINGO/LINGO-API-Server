@@ -58,6 +58,8 @@ def update(word_id, word):
 
     existing_word = Word.query.where(Word.id == word_id).one_or_none()
     if existing_word:
+        if "id" not in word:
+            word["id"] = word_id
         update_word = word_schema.load(word, session=db.session)
         db.session.merge(existing_word)
         db.session.commit()

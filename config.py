@@ -1,7 +1,6 @@
-import os
 import pathlib
 import connexion
-from os import environ, path
+from os import environ
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import firebase_admin
@@ -16,17 +15,29 @@ specdir = basedir.joinpath("spec")
 
 connex_app = connexion.App(__name__, specification_dir=specdir)
 app = connex_app.app
-enable_api_security = not app.config["DEBUG"]
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-if app.config["DEBUG"]:
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{dbdir / 'lingo.db'}"
-else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = environ.get("DATABASE_URL")
+# By default, API security is enabled.
+enable_api_security = True
+enable_security_var = environ.get("ENABLE_SECURITY")
+if enable_security_var:
+    security_flag = enable_security_var.strip()
+    if len(security_flag) > 0:
+        if security_flag.upper() == "NO":
+            enable_api_security = False
+
+# "mysql+pymysql://lingo:lingo@localhost/lingo"
+# By default, we will use SQLite if another database is not given
+database_uri = f"sqlite:///{dbdir / 'lingo.db'}"
+db_url_var = environ.get("DATABASE_URL")
+if db_url_var:
+    uri_input = db_url_var.strip()
+    if len(uri_input) > 0:
+        database_uri = uri_input
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 # Add the API specification into the server
 connex_app.add_api(specdir / "api.yml")
-

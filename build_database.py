@@ -13,4 +13,4 @@ def create_and_load_db():
         words = create_words(db, projects[0].id)
 
 
-# print("Run build_database.create_and_load_db() to create the DB schema and load sample data")
+print("Run build_database.create_and_load_db() to create the DB schema and load sample data")

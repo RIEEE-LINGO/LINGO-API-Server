@@ -22,3 +22,4 @@ Werkzeug==2.2.2
 flask-marshmallow[sqlalchemy]==0.14.0
 firebase-admin
 gunicorn
+pymysql

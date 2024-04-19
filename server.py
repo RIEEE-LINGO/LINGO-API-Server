@@ -7,6 +7,8 @@ from utils.base_data import create_projects, create_words, create_teams, create_
 # Otherwise, this is being loaded by gunicorn and we don't want
 # to call run.
 if __name__ == "__main__":
+    # If we are running in debug mode, set up the database if it
+    # hasn't already been configured.
     if not path.exists(dbdir):
         makedirs(dbdir)
         with app.app.app_context():
