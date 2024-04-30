@@ -2,7 +2,7 @@ from typing import Optional
 from flask import request
 from firebase_admin.auth import verify_id_token, get_user, UserRecord
 from lingo.models import User, TeamMember
-from config import db
+from config import db, default_team
 
 
 # Note: Based on code from https://pradyothkukkapalli.com/tech/firebase-auth-client-and-backend/
@@ -40,7 +40,7 @@ def get_current_user(create_missing_user=True, add_to_default_team=True) -> Opti
                 db.session.commit()
 
                 if add_to_default_team:
-                    teammate = TeamMember(user_id=user.id, team_id=1, email=user.email, is_owner=False)
+                    teammate = TeamMember(user_id=user.id, team_id=default_team, email=user.email, is_owner=False)
                     db.session.add(teammate)
                     db.session.commit()
 

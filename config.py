@@ -13,6 +13,8 @@ basedir = pathlib.Path(__file__).parent.resolve()
 dbdir = basedir.joinpath("db")
 specdir = basedir.joinpath("spec")
 
+default_team = 1
+
 connex_app = connexion.App(__name__, specification_dir=specdir)
 app = connex_app.app
 
