@@ -74,8 +74,25 @@ sqlite>
 
 # Starting the API Server
 
-To start the API server, run the command `python server.py`. You should see something like
-the following:
+To start the API server, you first need to set the environment variable
+used by the server to find the database. On Windows, you would set
+this using the `SET` command, while you would use the `export` command
+on a Mac or Linux machine:
+```
+# On Windows
+SET DATABASE_URL=mysql+pymysql://lingo:password@host-ip/lingo
+
+# On Mac or Linux
+export DATABASE_URL=mysql+pymysql://lingo:password@host-ip/lingo
+```
+
+For testing, you can also set the `ENABLE_SECURITY` flag to `NO` to
+disable security checks, but this should not be set at all for
+production environments or if you are testing with security enabled.
+By default, security is enabled.
+
+Now, to run the server, you can run the command `python server.py`. 
+You should see something like the following:
 ```angular2html
 $ python server.py
  * Serving Flask app 'config'
@@ -88,6 +105,16 @@ Press CTRL+C to quit
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 123-456-789
+```
+
+To run in production mode, you can instead run the `run.sh` script found in
+the `bin` directory. This will _NOT_ start the server in debug mode, so you
+should not do this for development. Finally, note that, on Mac or Linux
+machines, you can combine setting the location of the database and starting
+the server as a single command:
+
+```
+$ DATABASE_URL=mysql+pymysql://lingo:password@host-ip/lingo python server.py
 ```
 
 # Accessing the API
@@ -115,3 +142,20 @@ For instance, if you go to the above URL and navigate to the GET option under Wo
 you can click the "Try it out" button to make an API call. Then, click Execute. You will
 see the JSON result on the page. We are in the process of improving this since it does
 not yet handle parameters well.
+
+# Bundling the Server
+
+To create a Docker image for the server, you use the `Docker build`
+command (note that `0.0.2` is just a sample version number, the
+actual version number should be included):
+```
+docker build -t lingo-api-server:0.0.2
+```
+If you are on a Mac with Apple silicone then you need to include
+a flag to build an image that runs on Intel and AMD processors:
+```
+docker build --platform linux/amd64 -t lingo-api-server:0.0.2
+```
+If you don't do this, you may get errors when you try to create
+a running container, depending on the processor used on the
+server.
