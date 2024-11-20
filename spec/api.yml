@@ -20,6 +20,10 @@ components:
           type: "string"
         active:
           type: "boolean"
+        created_on:
+          type: "string"
+        modified_on:
+          type: "string"
     Meaning:
       type: "object"
       required:
@@ -31,6 +35,10 @@ components:
           type: "string"
         active:
           type: "boolean"
+        created_on:
+          type: "string"
+        modified_on:
+          type: "string"
     Reflection:
       type: "object"
       required:
@@ -42,14 +50,16 @@ components:
           type: "string"
         active:
           type: "boolean"
+        created_on:
+          type: "string"
+        modified_on:
+          type: "string"
     User:
       type: "object"
       required:
         - first_name
         - last_name
         - email
-        - created_on
-        - modified_on
       properties:
         first_name:
           type: "string"
@@ -59,18 +69,16 @@ components:
           type: "string"
         modified_on:
           type: "string"
-    Project:
+    Team:
       type: "object"
       required:
-        - oroject_name
+        - team_name
         - project_owner
         - is_active
-        - created_on
-        - modified_on
       properties:
-        project_name:
+        team_name:
           type: "string"
-        project_owner:
+        team_owner:
           type: "string"
         is_active:
           type: "string"
@@ -105,31 +113,31 @@ paths:
       responses:
         "200":
           description: "Successfully retrieved user"
-  /projects:
+  /teams:
     get:
-      operationId: "api.projects.get_all"
+      operationId: "api.teams.get_all"
       tags:
-        - "Projects"
-      summary: "Return the list of projects"
+        - "Teams"
+      summary: "Return the list of teams"
       responses:
         "200":
-          description: "Successfully read list of projects"
-  /projects/{project_id}:
+          description: "Successfully read list of teams"
+  /teams/{team_id}:
     get:
-      operationId: "api.projects.get"
+      operationId: "api.teams.get"
       parameters:
-        - name: project_id
+        - name: team_id
           in: path
-          description: "ID of project to fetch"
+          description: "ID of team to fetch"
           required: true
           schema:
             type: integer
       tags:
-        - "Projects"
-      summary: "Return an individual project by id"
+        - "Teams"
+      summary: "Return an individual team by id"
       responses:
         "200":
-          description: "Successfully retrieved project"
+          description: "Successfully retrieved team"
   /words:
     get:
       operationId: "api.words.get_all"
