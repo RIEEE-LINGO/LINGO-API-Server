@@ -1,4 +1,4 @@
-from lingo.models import User, Word, Project, Team, TeamMember, Meaning, Reflection
+from lingo.models import User, Word, Team, TeamMember, Meaning, Reflection
 from datetime import datetime
 
 
@@ -13,20 +13,14 @@ USERS = [
         "email": "hillsma@appstate.edu",
     },
     {
-        "first_name": "Elle",
-        "last_name": "Russell",
-        "email": "russellem@appstate.edu",
+        "first_name": "Christian",
+        "last_name": "Hart",
+        "email": "hartcj2@appstate.edu",
     },
     {
         "first_name": "Kim",
         "last_name": "Bourne",
         "email": "bournekd@appstate.edu",
-    }
-]
-
-PROJECTS = [
-    {
-        "name": "Prototype Project"
     }
 ]
 
@@ -43,7 +37,7 @@ TEAM_MEMBERS = [
     },
     {
         "id": 2,
-        "email": "russellem@appstate.edu"
+        "email": "hartcj2@appstate.edu"
     },
     {
         "id": 3,
@@ -193,30 +187,11 @@ def create_users(db):
     return users
 
 
-def create_projects(db):
-    projects = []
-
-    # NOTE: We need to update this to use the actual IDs
-    # This is fragile to changes in IDs assigned by the db.
-    for data in PROJECTS:
-        new_project = Project(
-            project_name=data.get("name"),
-            project_owner=1,
-            is_active=True
-        )
-        db.session.add(new_project)
-        projects.append(new_project)
-
-    db.session.commit()
-    return projects
-
-
 def create_teams(db):
     teams = []
 
     for data in TEAMS:
         new_team = Team(
-            project_id=1,
             team_name=data.get("name"),
             is_active=True
         )
@@ -227,7 +202,6 @@ def create_teams(db):
         new_member = TeamMember(
             team_id=1,
             user_id=data.get("id"),
-            email=data.get("email"),
             is_owner=True
         )
         db.session.add(new_member)
@@ -236,13 +210,13 @@ def create_teams(db):
     return teams
 
 
-def create_words(db, project_id):
+def create_words(db, team_id):
     words = []
 
     for data in WORDS:
         new_word = Word(
             word=data.get("word"),
-            project_id=project_id
+            team_id=team_id
         )
         db.session.add(new_word)
         db.session.commit()  # Needed so we have an ID for the word

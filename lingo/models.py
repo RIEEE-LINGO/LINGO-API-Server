@@ -1,8 +1,22 @@
 from datetime import datetime
 from config import db, ma
-from typing import Optional
-from sqlalchemy import String
+from typing import Optional, List
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped, relationship
+
+
+class TeamMember(db.Model):
+    __tablename__ = "team_member"
+    team_id: Mapped[int] = mapped_column(ForeignKey("team.id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
+    is_owner: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
 
 class User(db.Model):
@@ -17,33 +31,6 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(
         String(50), unique=True
     )
-    created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
-    )
-    team_roles = relationship(
-        "TeamMember",
-        backref="user",
-        cascade="all, delete, delete-orphan",
-        single_parent=True
-    )
-    owned_projects = relationship(
-        "Project",
-        backref="owner",
-        cascade="all, delete, delete-orphan",
-        single_parent=True
-    )
-
-
-class Project(db.Model):
-    __tablename__ = "project"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    project_name: Mapped[str] = mapped_column(
-        String(50), unique=True
-    )
-    project_owner: Mapped[int] = mapped_column(db.ForeignKey("user.id"))
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
@@ -51,28 +38,14 @@ class Project(db.Model):
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    teams = relationship(
-        "Team",
-        backref="project",
-        cascade="all, delete, delete-orphan",
-        single_parent=True,
-        order_by="Team.team_name"
-    )
-    words = relationship(
-        "Word",
-        backref="project",
-        cascade="all, delete, delete-orphan",
-        single_parent=True,
-        order_by="Word.word"
-    )
+    teams: Mapped[List["TeamMember"]] = relationship()
 
 
 class Team(db.Model):
     __tablename__ = "team"
     id: Mapped[int] = mapped_column(primary_key=True)
-    project_id: Mapped[int] = mapped_column(db.ForeignKey("project.id"))
     team_name: Mapped[str] = mapped_column(
-        String(50)
+        String(50), unique=True
     )
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -81,30 +54,8 @@ class Team(db.Model):
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    team_members = relationship(
-        "TeamMember",
-        backref="team",
-        cascade="all, delete, delete-orphan",
-        single_parent=True,
-        order_by="TeamMember.email"
-    )
-
-
-class TeamMember(db.Model):
-    __tablename__ = "team_member"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    team_id: Mapped[int] = mapped_column(db.ForeignKey("team.id"))
-    user_id: Mapped[int] = mapped_column(db.ForeignKey("user.id"))
-    email: Mapped[str] = mapped_column(
-        String(50)
-    )
-    is_owner: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    team_members: Mapped[List[TeamMember]] = relationship()
+    words: Mapped[List["Word"]] = relationship()
 
 
 class Word(db.Model):
@@ -113,28 +64,16 @@ class Word(db.Model):
     word: Mapped[str] = mapped_column(
         String(50)
     )
-    project_id: Mapped[int] = mapped_column(db.ForeignKey("project.id"))
-    active: Mapped[bool] = mapped_column(default=True)
+    team_id: Mapped[int] = mapped_column(db.ForeignKey("team.id"))
+    is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
     )
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    meanings = relationship(
-        "Meaning",
-        backref="word",
-        cascade="all, delete, delete-orphan",
-        single_parent=True,
-        order_by="Meaning.created_at"
-    )
-    reflections = relationship(
-        "Reflection",
-        backref="word",
-        cascade="all, delete, delete-orphan",
-        single_parent=True,
-        order_by="Reflection.created_at"
-    )
+    meanings: Mapped[List["Meaning"]] = relationship()
+    reflections: Mapped[List["Reflection"]] = relationship()
 
 
 class Meaning(db.Model):
@@ -144,7 +83,7 @@ class Meaning(db.Model):
     meaning: Mapped[str] = mapped_column(
         String(1000)
     )
-    active: Mapped[bool] = mapped_column(default=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
     )
@@ -160,7 +99,7 @@ class Reflection(db.Model):
     reflection: Mapped[str] = mapped_column(
         String(1000)
     )
-    active: Mapped[bool] = mapped_column(default=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
     )
@@ -172,14 +111,6 @@ class Reflection(db.Model):
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
-        load_instance = True
-        sqla_session = db.session
-        include_relationships = True
-
-
-class ProjectSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = Project
         load_instance = True
         sqla_session = db.session
         include_relationships = True
@@ -226,7 +157,6 @@ class ReflectionSchema(ma.SQLAlchemyAutoSchema):
 
 
 user_schema = UserSchema()
-project_schema = ProjectSchema()
 team_schema = TeamSchema()
 team_member_schema = TeamMemberSchema()
 word_schema = WordSchema()
@@ -234,96 +164,8 @@ meaning_schema = MeaningSchema()
 reflection_schema = ReflectionSchema()
 
 users_schema = UserSchema(many=True)
-projects_schema = ProjectSchema(many=True)
-team_schema = TeamSchema(many=True)
+teams_schema = TeamSchema(many=True)
 team_members_schema = TeamMemberSchema(many=True)
 words_schema = WordSchema(many=True)
 meanings_schema = MeaningSchema(many=True)
 reflections_schema = ReflectionSchema(many=True)
-
-# from sqlalchemy.orm import DeclarativeBase
-# from sqlalchemy.orm import Mapped
-# from sqlalchemy.orm import MappedAsDataclass
-# from sqlalchemy import ForeignKey
-# from sqlalchemy import String
-# from sqlalchemy import DateTime
-# from typing import List
-# from typing import Optional
-# from sqlalchemy.orm import mapped_column
-# from sqlalchemy.orm import relationship
-# from datetime import datetime
-# from sqlalchemy import func
-
-# # LI8330.o0b229mb
-
-# class Base(DeclarativeBase):
-#     pass
-
-# class User(MappedAsDataclass,Base):
-#     __tablename__ = "user"
-
-#     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    
-# class UserProject(MappedAsDataclass,Base):
-#     __tablename__ = "user_project_xref"
-
-#     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-#     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-#     project_id: Mapped[int] = mapped_column(ForeignKey("project.id"))
-#     role: Mapped[int]
-    
-# class Project(MappedAsDataclass,Base):
-#     __tablename__ = "project"
-
-#     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-#     name: Mapped[str]
-#     description: Mapped[str] = mapped_column(String(5000))
-#     terms: Mapped[List["Term"]] = relationship(
-#         default_factory=list, 
-#         back_populates="project"
-#     )
-#     created: Mapped[datetime] = mapped_column(
-#         insert_default=func.utc_timestamp(), 
-#         default=None
-#     )
-#     modified: Mapped[datetime] = mapped_column(
-#         insert_default=func.utc_timestamp(), 
-#         default=None
-#     )
-
-# class Term(MappedAsDataclass,Base):
-#     __tablename__ = "term"
-
-#     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-#     term: Mapped[str]
-#     project_id: Mapped[int] = mapped_column(ForeignKey("project.id"))
-#     project: Mapped["Project"] = relationship(
-#         back_populates="terms"
-#     )
-#     reflections: Mapped[List["Reflection"]] = relationship(
-#         default_factory=list,
-#         back_populates="term"
-#     )
-#     created: Mapped[datetime] = mapped_column(
-#         insert_default=func.utc_timestamp(), default=None
-#     )
-#     modified: Mapped[datetime] = mapped_column(
-#         insert_default=func.utc_timestamp(), default=None
-#     )
-
-# class Reflection(MappedAsDataclass,Base):
-#     __tablename__ = "term_reflection"
-
-#     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-#     reflection: Mapped[str]
-#     term_id: Mapped[int] = mapped_column(ForeignKey("term.id"))
-#     term: Mapped["Term"] = relationship(
-#         back_populates="reflections"
-#     )
-#     created: Mapped[datetime] = mapped_column(
-#         insert_default=func.utc_timestamp(), default=None
-#     )
-#     modified: Mapped[datetime] = mapped_column(
-#         insert_default=func.utc_timestamp(), default=None
-#     )
-

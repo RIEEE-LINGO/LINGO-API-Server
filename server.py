@@ -1,7 +1,7 @@
 from flask import render_template, Response
 from config import connex_app as app, dbdir, db
 from os import path, makedirs
-from utils.base_data import create_projects, create_words, create_teams, create_users
+from utils.base_data import create_words, create_teams, create_users
 
 # If we run this file directly, that means we are in debug mode.
 # Otherwise, this is being loaded by gunicorn and we don't want
@@ -14,9 +14,8 @@ if __name__ == "__main__":
         with app.app.app_context():
             db.create_all()
             users = create_users(db)
-            projects = create_projects(db)
             teams = create_teams(db)
-            words = create_words(db, projects[0].id)
+            words = create_words(db, teams[0].id)
 
     app.run(host="0.0.0.0", port=8000, debug=True)
 
