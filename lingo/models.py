@@ -1,8 +1,22 @@
 from datetime import datetime
 from config import db, ma
-from typing import Optional
-from sqlalchemy import String
+from typing import Optional, List
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped, relationship
+
+
+class TeamMember(db.Model):
+    __tablename__ = "team_member"
+    team_id: Mapped[int] = mapped_column(ForeignKey("team.id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
+    is_owner: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
 
 class User(db.Model):
@@ -24,12 +38,8 @@ class User(db.Model):
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    teams = relationship(
-        "TeamMember",
-        backref="user",
-        cascade="all, delete, delete-orphan",
-        single_parent=True
-    )
+    teams: Mapped[List["TeamMember"]] = relationship()
+
 
 class Team(db.Model):
     __tablename__ = "team"
@@ -44,34 +54,8 @@ class Team(db.Model):
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    team_members = relationship(
-        "TeamMember",
-        backref="team",
-        cascade="all, delete, delete-orphan",
-        single_parent=True,
-        order_by="TeamMember.email"
-    )
-    words = relationship(
-        "Word",
-        backref="team",
-        cascade="all, delete, delete-orphan",
-        single_parent=True,
-        order_by="Word.word"
-    )
-
-class TeamMember(db.Model):
-    __tablename__ = "team_member"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    team_id: Mapped[int] = mapped_column(db.ForeignKey("team.id"))
-    user_id: Mapped[int] = mapped_column(db.ForeignKey("user.id"))
-    team_owner: Mapped[bool] = mapped_column(default=False)
-    is_active: Mapped[bool] = mapped_column(default=True)
-    created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    team_members: Mapped[List[TeamMember]] = relationship()
+    words: Mapped[List["Word"]] = relationship()
 
 
 class Word(db.Model):
@@ -88,20 +72,8 @@ class Word(db.Model):
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    meanings = relationship(
-        "Meaning",
-        backref="word",
-        cascade="all, delete, delete-orphan",
-        single_parent=True,
-        order_by="Meaning.created_at"
-    )
-    reflections = relationship(
-        "Reflection",
-        backref="word",
-        cascade="all, delete, delete-orphan",
-        single_parent=True,
-        order_by="Reflection.created_at"
-    )
+    meanings: Mapped[List["Meaning"]] = relationship()
+    reflections: Mapped[List["Reflection"]] = relationship()
 
 
 class Meaning(db.Model):

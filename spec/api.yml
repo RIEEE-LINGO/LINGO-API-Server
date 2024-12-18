@@ -18,7 +18,7 @@ components:
           type: "integer"
         word:
           type: "string"
-        active:
+        is_active:
           type: "boolean"
         created_on:
           type: "string"
@@ -33,7 +33,7 @@ components:
           type: "integer"
         meaning:
           type: "string"
-        active:
+        is_active:
           type: "boolean"
         created_on:
           type: "string"
@@ -48,7 +48,7 @@ components:
           type: "integer"
         reflection:
           type: "string"
-        active:
+        is_active:
           type: "boolean"
         created_on:
           type: "string"
@@ -73,12 +73,9 @@ components:
       type: "object"
       required:
         - team_name
-        - project_owner
         - is_active
       properties:
         team_name:
-          type: "string"
-        team_owner:
           type: "string"
         is_active:
           type: "string"
@@ -113,6 +110,22 @@ paths:
       responses:
         "200":
           description: "Successfully retrieved user"
+  /users/{user_id}/teams:
+    get:
+      operationId: "api.teams.get_teams_for_user"
+      parameters:
+        - name: user_id
+          in: path
+          description: "ID of user to fetch"
+          required: true
+          schema:
+            type: integer
+      tags:
+        - "Users"
+      summary: "Return an individual user by id"
+      responses:
+        "200":
+          description: "Successfully retrieved user"
   /teams:
     get:
       operationId: "api.teams.get_all"
@@ -122,6 +135,23 @@ paths:
       responses:
         "200":
           description: "Successfully read list of teams"
+    post:
+      operationId: "api.teams.create"
+      tags:
+        - "Teams"
+      summary: "Create a new team"
+      requestBody:
+        description: "Team to create"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "team"
+              $ref: "#/components/schemas/Team"
+      responses:
+        "200":
+          description: "Successfully created team"
+
   /teams/{team_id}:
     get:
       operationId: "api.teams.get"
@@ -138,6 +168,84 @@ paths:
       responses:
         "200":
           description: "Successfully retrieved team"
+    put:
+      operationId: "api.teams.update"
+      tags:
+        - "Teams"
+      summary: "Update an existing team"
+      requestBody:
+        description: "Team to update"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "team"
+              $ref: "#/components/schemas/Team"
+      responses:
+        "200":
+          description: "Successfully updated team"
+    delete:
+      operationId: "api.teams.delete"
+      parameters:
+        - name: team_id
+          in: path
+          description: "ID of team to delete"
+          required: true
+          schema:
+            type: integer
+      tags:
+        - "Teams"
+      summary: "Delete an individual team by id"
+      responses:
+        "200":
+          description: "Successfully deleted team"
+  /teams/{team_id}/words:
+    get:
+      operationId: "api.words.get_all_for_team"
+      parameters:
+        - name: team_id
+          in: path
+          description: "ID of team"
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: filter
+          schema:
+            type: string
+            enum: [all, onlyActive, onlyDeleted]
+          required: false
+      tags:
+        - "Words"
+        - "Teams"
+      summary: "Return the list of words for a given team"
+      responses:
+        "200":
+          description: "Successfully read list of words for team"
+  /teams/{team_id}/users:
+    get:
+      operationId: "api.users.get_all_for_team"
+      parameters:
+        - name: team_id
+          in: path
+          description: "ID of team"
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: filter
+          schema:
+            type: string
+            enum: [all, onlyActive, onlyDeleted]
+          required: false
+      tags:
+        - "Users"
+        - "Teams"
+      summary: "Return the list of users for a given team"
+      responses:
+        "200":
+          description: "Successfully read list of users for team"
+
   /words:
     get:
       operationId: "api.words.get_all"

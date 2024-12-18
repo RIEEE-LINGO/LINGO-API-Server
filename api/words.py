@@ -21,13 +21,38 @@ def get_all(filter = "onlyActive"):
     check_word_security()
 
     if filter.lower() == "onlyactive":
-        words = Word.query.where(Word.active == True).all()
+        words = Word.query.where(Word.is_active == True).all()
         return words_schema.dump(words)
     elif filter.lower() == "onlydeleted":
-        words = Word.query.where(Word.active == False).all()
+        words = Word.query.where(Word.is_active == False).all()
         return words_schema.dump(words)
     else:
         words = Word.query.all()
+        return words_schema.dump(words)
+
+
+def get_all_for_team(team_id, filter = "onlyActive"):
+    check_word_security()
+
+    if filter.lower() == "onlyactive":
+        words = (Word
+                 .query
+                 .where(Word.team == team_id)
+                 .where(Word.is_active == True)
+                 .all())
+        return words_schema.dump(words)
+    elif filter.lower() == "onlydeleted":
+        words = (Word
+                 .query
+                 .where(Word.team == team_id)
+                 .where(Word.is_active == False)
+                 .all())
+        return words_schema.dump(words)
+    else:
+        words = (Word
+                 .query
+                 .where(Word.team == team_id)
+                 .all())
         return words_schema.dump(words)
 
 
@@ -76,7 +101,7 @@ def delete(word_id):
 
     existing_word = Word.query.where(Word.id == word_id).one_or_none()
     if existing_word:
-        existing_word.active = False
+        existing_word.is_active = False
         db.session.merge(existing_word)
         db.session.commit()
         return True
