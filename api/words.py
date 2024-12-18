@@ -37,21 +37,21 @@ def get_all_for_team(team_id, filter = "onlyActive"):
     if filter.lower() == "onlyactive":
         words = (Word
                  .query
-                 .where(Word.team == team_id)
+                 .where(Word.team_id == team_id)
                  .where(Word.is_active == True)
                  .all())
         return words_schema.dump(words)
     elif filter.lower() == "onlydeleted":
         words = (Word
                  .query
-                 .where(Word.team == team_id)
+                 .where(Word.team_id == team_id)
                  .where(Word.is_active == False)
                  .all())
         return words_schema.dump(words)
     else:
         words = (Word
                  .query
-                 .where(Word.team == team_id)
+                 .where(Word.team_id == team_id)
                  .all())
         return words_schema.dump(words)
 
