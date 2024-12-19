@@ -6,16 +6,18 @@ from utils.utils import get_current_user
 
 
 def check_team_security():
-    if enable_api_security:
-        user = get_current_user()
-        if not user:
-            abort(
-                401,
-                "Unauthorized"
-            )
+    user = get_current_user()
+    if user is None:
+        abort(
+            401,
+            "Unauthorized"
+        )
 
-        # Add other rules for user checking here
-        # TODO
+    # Add other rules for user checking here
+    # TODO
+
+    return user
+
 
 
 def add_filter(query, filter):
@@ -53,6 +55,14 @@ def get_teams_for_user(user_id, filter = "onlyActive"):
     check_team_security()
 
     query = add_filter(select(Team).join(Team.team_members).where(TeamMember.user_id == user_id), filter)
+    result = db.session.scalars(query).all()
+    return teams_schema.dump(result)
+
+
+def get_my_teams(filter = "onlyActive"):
+    user = check_team_security()
+
+    query = add_filter(select(Team).join(Team.team_members).where(TeamMember.user_id == user.id), filter)
     result = db.session.scalars(query).all()
     return teams_schema.dump(result)
 

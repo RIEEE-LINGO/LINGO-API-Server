@@ -27,6 +27,15 @@ if enable_security_var:
         if security_flag.upper() == "NO":
             enable_api_security = False
 
+# Default user ID, for when security is not enabled.
+default_user_id = 1
+default_user_id_var = environ.get("DEFAULT_USER_ID")
+if default_user_id_var:
+    try:
+        default_user_id = int(default_user_id_var.strip())
+    except ValueError:
+        default_user_id = 1
+
 # "mysql+pymysql://lingo:lingo@localhost/lingo"
 # By default, we will use SQLite if another database is not given
 database_uri = f"sqlite:///{dbdir / 'lingo.db'}"

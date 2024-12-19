@@ -137,10 +137,39 @@ paths:
           required: false
       tags:
         - "Users"
-      summary: "Return an individual user by id"
+        - "Teams"
+      summary: "Return the teams for a specific user"
       responses:
         "200":
-          description: "Successfully retrieved user"
+          description: "Successfully retrieved teams"
+
+  /my/teams:
+    get:
+      operationId: "api.teams.get_my_teams"
+      parameters:
+        - in: query
+          name: filter
+          schema:
+            type: string
+            enum: [all, onlyActive, onlyDeleted]
+          required: false
+      tags:
+        - "Users"
+        - "Teams"
+      summary: "Return the teams for the current user"
+      responses:
+        "200":
+          description: "Successfully retrieved teams"
+
+  /my/userinfo:
+    get:
+      operationId: "api.users.get_my_user_info"
+      tags:
+        - "Users"
+      summary: "Return the user info for the current user"
+      responses:
+        "200":
+          description: "Successfully retrieved user info"
 
   /teams:
     get:

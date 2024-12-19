@@ -1,8 +1,8 @@
 from typing import Optional
-from flask import request
+from flask import request, abort
 from firebase_admin.auth import verify_id_token, get_user, UserRecord
 from lingo.models import User, TeamMember
-from config import db, default_team
+from config import db, default_team, default_user_id, enable_api_security
 
 
 # Note: Based on code from https://pradyothkukkapalli.com/tech/firebase-auth-client-and-backend/
@@ -11,6 +11,15 @@ from config import db, default_team
 # needed to ensure the user has permission to access the data they are trying to
 # retrieve, e.g., that the words are from a project they are part of.
 def get_current_user(create_missing_user=True, add_to_default_team=True) -> Optional[str]:
+    # First, see if API security is enabled. If not, we just look up the user
+    # info for the default user and skip the rest.
+    if not enable_api_security:
+        user = User.query.where(User.id == default_user_id).one_or_none()
+        if not user:
+            abort(401, "User does not exist")
+        else:
+            return user
+
     # Return None if no Authorization header.
     if "Authorization" not in request.headers:
         return None

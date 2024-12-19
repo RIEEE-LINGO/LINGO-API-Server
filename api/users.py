@@ -5,16 +5,17 @@ from utils.utils import get_current_user
 from sqlalchemy import select
 
 def check_user_security():
-    if enable_api_security:
-        user = get_current_user()
-        if not user:
-            abort(
-                401,
-                "Unauthorized"
-            )
+    user = get_current_user()
+    if user is None:
+        abort(
+            401,
+            "Unauthorized"
+        )
 
-        # Add other rules for user checking here
-        # TODO
+    # Add other rules for user checking here
+    # TODO
+
+    return user
 
 
 def add_filter(query, filter):
@@ -54,6 +55,11 @@ def get(user_id):
         abort(
             404, f"User with id {user_id} not found"
         )
+
+
+def get_my_user_info():
+    user = check_user_security()
+    return user_schema.dump(user)
 
 
 def create(user):

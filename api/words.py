@@ -5,16 +5,18 @@ from utils.utils import get_current_user
 from sqlalchemy import select
 
 def check_word_security():
-    if enable_api_security:
-        user = get_current_user()
-        if not user:
-            abort(
-                401,
-                "Unauthorized"
-            )
+    user = get_current_user()
+    if user is None:
+        abort(
+            401,
+            "Unauthorized"
+        )
 
-        # Add other rules for user checking here
-        # TODO
+    # Add other rules for user checking here
+    # TODO
+
+    return user
+
 
 
 def add_filter(query, filter):
