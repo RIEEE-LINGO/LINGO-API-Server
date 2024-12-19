@@ -2,7 +2,7 @@ from flask import abort
 from config import enable_api_security, db
 from lingo.models import Word, word_schema, words_schema
 from utils.utils import get_current_user
-
+from sqlalchemy import select
 
 def check_word_security():
     if enable_api_security:
@@ -17,52 +17,39 @@ def check_word_security():
         # TODO
 
 
+def add_filter(query, filter):
+    if filter.lower() == "onlyactive":
+        return query.where(Word.is_active == True)
+    elif filter.lower() == "onlydeleted":
+        return query.where(Word.is_active == False)
+    else:
+        return query
+
+
 def get_all(filter = "onlyActive"):
     check_word_security()
 
-    if filter.lower() == "onlyactive":
-        words = Word.query.where(Word.is_active == True).all()
-        return words_schema.dump(words)
-    elif filter.lower() == "onlydeleted":
-        words = Word.query.where(Word.is_active == False).all()
-        return words_schema.dump(words)
-    else:
-        words = Word.query.all()
-        return words_schema.dump(words)
+    query = add_filter(select(Word), filter)
+    result = db.session.scalars(query).all()
+    return words_schema.dump(result)
 
 
 def get_all_for_team(team_id, filter = "onlyActive"):
     check_word_security()
 
-    if filter.lower() == "onlyactive":
-        words = (Word
-                 .query
-                 .where(Word.team_id == team_id)
-                 .where(Word.is_active == True)
-                 .all())
-        return words_schema.dump(words)
-    elif filter.lower() == "onlydeleted":
-        words = (Word
-                 .query
-                 .where(Word.team_id == team_id)
-                 .where(Word.is_active == False)
-                 .all())
-        return words_schema.dump(words)
-    else:
-        words = (Word
-                 .query
-                 .where(Word.team_id == team_id)
-                 .all())
-        return words_schema.dump(words)
+    query = add_filter(select(Word).where(Word.team_id == team_id), filter)
+    result = db.session.scalars(query).all()
+    return words_schema.dump(result)
 
 
 def get(word_id):
     check_word_security()
 
-    word = Word.query.where(Word.id == word_id).one_or_none()
+    query = select(Word).where(Word.id == word_id)
+    result = db.session.scalar(query)
 
-    if word is not None:
-        return word_schema.dump(word)
+    if result is not None:
+        return word_schema.dump(result)
     else:
         abort(
             404, f"Word with id {word_id} not found"

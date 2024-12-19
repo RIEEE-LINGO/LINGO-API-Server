@@ -1,7 +1,8 @@
 from flask import abort
 from config import enable_api_security, db
-from lingo.models import User, user_schema, users_schema
+from lingo.models import User, Team, user_schema, users_schema
 from utils.utils import get_current_user
+from sqlalchemy import select
 
 def check_user_security():
     if enable_api_security:
@@ -16,41 +17,39 @@ def check_user_security():
         # TODO
 
 
-def get_all():
-    users = User.query.all()
-    return users_schema.dump(users)
+def add_filter(query, filter):
+    if filter.lower() == "onlyactive":
+        return query.where(User.is_active == True)
+    elif filter.lower() == "onlydeleted":
+        return query.where(User.is_active == False)
+    else:
+        return query
+
+
+def get_all(filter = "onlyActive"):
+    check_user_security()
+
+    query = add_filter(select(User).order_by(User.email), filter)
+    result = db.session.scalars(query).all()
+    return users_schema.dump(result)
 
 
 def get_all_for_team(team_id, filter = "onlyActive"):
     check_user_security()
 
-    if filter.lower() == "onlyactive":
-        words = (User
-                 .query
-                 .where(User.team == team_id)
-                 .where(User.active == True)
-                 .all())
-        return users_schema.dump(words)
-    elif filter.lower() == "onlydeleted":
-        words = (User
-                 .query
-                 .where(User.team == team_id)
-                 .where(User.active == False)
-                 .all())
-        return users_schema.dump(words)
-    else:
-        words = (User
-                 .query
-                 .where(User.team == team_id)
-                 .all())
-        return users_schema.dump(words)
+    query = add_filter(select(User).join(User.teams).where(Team.id == team_id).order_by(User.email), filter)
+    result = db.session.scalars(query).all()
+    return users_schema.dump(result)
 
 
 def get(user_id):
-    user = User.query.where(User.id == user_id).one_or_none()
+    check_user_security()
 
-    if user is not None:
-        return user_schema.dump(user)
+    query = select(User).where(User.id == user_id)
+    result = db.session.scalar(query)
+
+    if result is not None:
+        return user_schema.dump(result)
     else:
         abort(
             404, f"User with id {user_id} not found"
@@ -58,6 +57,8 @@ def get(user_id):
 
 
 def create(user):
+    check_user_security()
+
     new_user = user_schema.load(user, session=db.session)
     db.session.add(new_user)
     db.session.commit()
@@ -65,6 +66,8 @@ def create(user):
 
 
 def update(user_id, user):
+    check_user_security()
+
     existing_user = User.query.where(User.id == user_id).one_or_none()
     if existing_user:
         update_user = user_schema.load(user, session=db.session)

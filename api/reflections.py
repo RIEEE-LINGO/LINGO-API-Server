@@ -2,6 +2,7 @@ from flask import abort
 from config import enable_api_security, db
 from lingo.models import Reflection, reflection_schema, reflections_schema
 from utils.utils import get_current_user
+from sqlalchemy import select
 
 
 def check_reflection_security():
@@ -17,31 +18,35 @@ def check_reflection_security():
         # TODO
 
 
+def add_filter(query, filter):
+    if filter.lower() == "onlyactive":
+        return query.where(Reflection.is_active == True)
+    elif filter.lower() == "onlydeleted":
+        return query.where(Reflection.is_active == False)
+    else:
+        return query
+
+
 def get_all(word_id, filter="onlyActive"):
     check_reflection_security()
 
-    if filter.lower() == "onlyactive":
-        reflections_for_word = Reflection.query.where(Reflection.word_id == word_id, Reflection.active == True).all()
-        return reflections_schema.dump(reflections_for_word)
-    elif filter.lower() == "onlydeleted":
-        reflections_for_word = Reflection.query.where(Reflection.word_id == word_id, Reflection.active == False).all()
-        return reflections_schema.dump(reflections_for_word)
-    else:
-        reflections_for_word = Reflection.query.where(Reflection.word_id == word_id).all()
-        return reflections_schema.dump(reflections_for_word)
+    query = add_filter(select(Reflection).where(Reflection.word_id == word_id), filter)
+    result = db.session.scalars(query).all()
+    return reflections_schema.dump(result)
 
 
-def get(word_id, reflection_id):
+def get(reflection_id):
     check_reflection_security()
 
-    reflection = Reflection.query.where(Reflection.id == reflection_id, Reflection.word_id == word_id).one_or_none()
+    query = select(Reflection).where(Reflection.id == reflection_id)
+    result = db.session.scalar(query)
 
-    if reflection is not None:
-        return reflection_schema.dump(reflection)
+    if result is not None:
+        return reflection_schema.dump(result)
     else:
         abort(
             404,
-            f"Reflection with id {reflection_id} for word with id {word_id} not found"
+            f"Meaning with id {reflection_id} not found"
         )
 
 
@@ -56,12 +61,11 @@ def create(word_id, reflection):
     return reflection_schema.dump(new_reflection), 201
 
 
-def update(word_id, reflection_id, reflection):
+def update(reflection_id, reflection):
     check_reflection_security()
 
     # TODO: It may make sense to check to ensure the word ID has not changed.
-    existing_reflection = Reflection.query.where(Reflection.id == reflection_id,
-                                                 Reflection.word_id == word_id).one_or_none()
+    existing_reflection = Reflection.query.where(Reflection.id == reflection_id).one_or_none()
     if existing_reflection:
         update_reflection = reflection_schema.load(reflection, session=db.session)
         db.session.merge(existing_reflection)
@@ -70,15 +74,14 @@ def update(word_id, reflection_id, reflection):
     else:
         abort(
             404,
-            f"Reflection with id {reflection_id} for word with id {word_id} not found"
+            f"Reflection with id {reflection_id} not found"
         )
 
 
-def delete(word_id, reflection_id):
+def delete(reflection_id):
     check_reflection_security()
 
-    existing_reflection = Reflection.query.where(Reflection.id == reflection_id,
-                                                 Reflection.word_id == word_id).one_or_none()
+    existing_reflection = Reflection.query.where(Reflection.id == reflection_id).one_or_none()
     if existing_reflection:
         existing_reflection.active = False
         db.session.merge(existing_reflection)
@@ -87,5 +90,5 @@ def delete(word_id, reflection_id):
     else:
         abort(
             404,
-            f"Reflection with id {reflection_id} for word with id {word_id} not found"
+            f"Reflection with id {reflection_id} not found"
         )

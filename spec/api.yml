@@ -88,12 +88,20 @@ paths:
   /users:
     get:
       operationId: "api.users.get_all"
+      parameters:
+        - in: query
+          name: filter
+          schema:
+            type: string
+            enum: [all, onlyActive, onlyDeleted]
+          required: false
       tags:
         - "Users"
       summary: "Return the list of users"
       responses:
         "200":
           description: "Successfully read list of users"
+
   /users/{user_id}:
     get:
       operationId: "api.users.get"
@@ -110,6 +118,7 @@ paths:
       responses:
         "200":
           description: "Successfully retrieved user"
+
   /users/{user_id}/teams:
     get:
       operationId: "api.teams.get_teams_for_user"
@@ -120,15 +129,29 @@ paths:
           required: true
           schema:
             type: integer
+        - in: query
+          name: filter
+          schema:
+            type: string
+            enum: [all, onlyActive, onlyDeleted]
+          required: false
       tags:
         - "Users"
       summary: "Return an individual user by id"
       responses:
         "200":
           description: "Successfully retrieved user"
+
   /teams:
     get:
       operationId: "api.teams.get_all"
+      parameters:
+        - in: query
+          name: filter
+          schema:
+            type: string
+            enum: [all, onlyActive, onlyDeleted]
+          required: false
       tags:
         - "Teams"
       summary: "Return the list of teams"
@@ -199,6 +222,7 @@ paths:
       responses:
         "200":
           description: "Successfully deleted team"
+
   /teams/{team_id}/words:
     get:
       operationId: "api.words.get_all_for_team"
@@ -222,6 +246,7 @@ paths:
       responses:
         "200":
           description: "Successfully read list of words for team"
+
   /teams/{team_id}/users:
     get:
       operationId: "api.users.get_all_for_team"
@@ -278,6 +303,7 @@ paths:
       responses:
         "200":
           description: "Successfully created word"
+
   /words/{word_id}:
     get:
       operationId: "api.words.get"
@@ -364,16 +390,11 @@ paths:
       responses:
         "200":
           description: "Successfully created meaning for word"
-  /words/{word_id}/meanings/{meaning_id}:
+
+  /meanings/{meaning_id}:
     get:
       operationId: "api.meanings.get"
       parameters:
-        - name: word_id
-          in: path
-          description: "ID of word for meanings being fetched"
-          required: true
-          schema:
-            type: integer
         - name: meaning_id
           in: path
           description: "ID of meaning to fetch"
@@ -405,12 +426,6 @@ paths:
     delete:
       operationId: "api.meanings.delete"
       parameters:
-        - name: word_id
-          in: path
-          description: "ID of word for meaning being deleted"
-          required: true
-          schema:
-            type: integer
         - name: meaning_id
           in: path
           description: "ID of meaning to delete"
@@ -423,6 +438,7 @@ paths:
       responses:
         "200":
           description: "Successfully deleted meaning"
+
   /words/{word_id}/reflections:
     get:
       operationId: "api.reflections.get_all"
@@ -461,16 +477,11 @@ paths:
       responses:
         "200":
           description: "Successfully created reflection for word"
-  /words/{word_id}/reflections/{reflection_id}:
+
+  /reflections/{reflection_id}:
     get:
       operationId: "api.reflections.get"
       parameters:
-        - name: word_id
-          in: path
-          description: "ID of word for reflections being fetched"
-          required: true
-          schema:
-            type: integer
         - name: reflection_id
           in: path
           description: "ID of reflection to fetch"
@@ -502,12 +513,6 @@ paths:
     delete:
       operationId: "api.reflections.delete"
       parameters:
-        - name: word_id
-          in: path
-          description: "ID of word for reflection being deleted"
-          required: true
-          schema:
-            type: integer
         - name: reflection_id
           in: path
           description: "ID of reflection to delete"

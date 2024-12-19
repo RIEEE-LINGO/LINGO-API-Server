@@ -18,10 +18,19 @@ def check_team_security():
         # TODO
 
 
-def get_all():
+def add_filter(query, filter):
+    if filter.lower() == "onlyactive":
+        return query.where(Team.is_active == True)
+    elif filter.lower() == "onlydeleted":
+        return query.where(Team.is_active == False)
+    else:
+        return query
+
+
+def get_all(filter = "onlyActive"):
     check_team_security()
 
-    query = select(Team)
+    query = add_filter(select(Team), filter)
     result = db.session.scalars(query).all()
     return teams_schema.dump(result)
 
@@ -40,10 +49,10 @@ def get(team_id):
         )
 
 
-def get_teams_for_user(user_id):
+def get_teams_for_user(user_id, filter = "onlyActive"):
     check_team_security()
 
-    query = select(Team).join(Team.team_members).where(TeamMember.user_id == user_id)
+    query = add_filter(select(Team).join(Team.team_members).where(TeamMember.user_id == user_id), filter)
     result = db.session.scalars(query).all()
     return teams_schema.dump(result)
 

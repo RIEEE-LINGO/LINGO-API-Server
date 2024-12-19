@@ -2,7 +2,7 @@ from flask import abort
 from config import enable_api_security, db
 from lingo.models import Meaning, meaning_schema, meanings_schema
 from utils.utils import get_current_user
-
+from sqlalchemy import select
 
 def check_meaning_security():
     if enable_api_security:
@@ -17,31 +17,35 @@ def check_meaning_security():
         # TODO
 
 
+def add_filter(query, filter):
+    if filter.lower() == "onlyactive":
+        return query.where(Meaning.is_active == True)
+    elif filter.lower() == "onlydeleted":
+        return query.where(Meaning.is_active == False)
+    else:
+        return query
+
+
 def get_all(word_id, filter="onlyActive"):
     check_meaning_security()
 
-    if filter.lower() == "onlyactive":
-        meanings_for_word = Meaning.query.where(Meaning.word_id == word_id, Meaning.active == True).all()
-        return meanings_schema.dump(meanings_for_word)
-    elif filter.lower() == "onlydeleted":
-        meanings_for_word = Meaning.query.where(Meaning.word_id == word_id, Meaning.active == False).all()
-        return meanings_schema.dump(meanings_for_word)
-    else:
-        meanings_for_word = Meaning.query.where(Meaning.word_id == word_id).all()
-        return meanings_schema.dump(meanings_for_word)
+    query = add_filter(select(Meaning).where(Meaning.word_id == word_id), filter)
+    result = db.session.scalars(query).all()
+    return meanings_schema.dump(result)
 
 
-def get(word_id, meaning_id):
+def get(meaning_id):
     check_meaning_security()
 
-    meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
+    query = select(Meaning).where(Meaning.id == meaning_id)
+    result = db.session.scalar(query)
 
-    if meaning is not None:
-        return meaning_schema.dump(meaning)
+    if result is not None:
+        return meaning_schema.dump(result)
     else:
         abort(
             404,
-            f"Meaning with id {meaning_id} for word with id {word_id} not found"
+            f"Meaning with id {meaning_id} not found"
         )
 
 
