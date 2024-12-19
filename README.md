@@ -23,25 +23,13 @@ pip install -r requirements.txt
 
 # Creating the Database
 
-To start, you should create a database and add sample data. To do this, you
-should run python (while in the virtual environment) and run the script
-which does this (note that, on the first line, `$` is the prompt, not part
-of the command you type, similarly `>>>` is the prompt inside the Python
-interpreter). Note that you need to create the `db` directory first since
-Python will not do this for you:
-```angular2html
-$ mkdir db
-$ python
-Python 3.9.13 (main, Aug 25 2022, 18:29:29) 
-[Clang 12.0.0 ] :: Anaconda, Inc. on darwin
-Type "help", "copyright", "credits" or "license" for more information.
->>> import build_database
-Run build_database.create_and_load_db() to create the DB schema and load sample data
->>> build_database.create_and_load_db()
-```
-
-Note that this will _not_ be used directly in production, since this uses
-SQLite and loads sample data. A script for production will be provided later.
+To start, you should create a database and add sample data. The easiest way to
+do this is just to run `server.py`. By default, this will be run in debug mode.
+When it starts, it looks for a `db` directory and, if it does not find one, it
+creates the sample database and loads sample data automatically. Note that this
+should _not_ be done in production, which is using a different kind of database
+(MySQL vs SQLite). If you delete the `db` directory, the application will create
+it again the next time it is run.
 
 # Exploring the Database
 
@@ -52,18 +40,17 @@ $ sqlite3 db/lingo.db
 SQLite version 3.39.3 2022-09-05 11:02:23
 Enter ".help" for usage hints.
 sqlite> .tables
-meaning      reflection   team_member  word       
-project      team         user       
+meaning      reflection   team         team_member  user         word       
 sqlite> select * from word;
-1|co-creation of knowledge|1|2024-01-03 19:37:22.257080|2024-01-03 19:37:22.257083
-2|Co-production|1|2024-01-03 19:37:22.262213|2024-01-03 19:37:22.262217
-3|Convergence|1|2024-01-03 19:37:22.266115|2024-01-03 19:37:22.266117
-4|Data|1|2024-01-03 19:37:22.268860|2024-01-03 19:37:22.268861
-5|data twinning|1|2024-01-03 19:37:22.272429|2024-01-03 19:37:22.272430
-6|digital twinning|1|2024-01-03 19:37:22.273329|2024-01-03 19:37:22.273330
-7|epistemic humility|1|2024-01-03 19:37:22.274251|2024-01-03 19:37:22.274252
-8|extension|1|2024-01-03 19:37:22.277284|2024-01-03 19:37:22.277285
-9|farmer|1|2024-01-03 19:37:22.279305|2024-01-03 19:37:22.279306
+1|1|co-creation of knowledge|1|2024-12-19 20:29:04.915818|2024-12-19 20:29:04.915819
+2|1|Co-production|1|2024-12-19 20:29:04.919654|2024-12-19 20:29:04.919655
+3|1|Convergence|1|2024-12-19 20:29:04.923630|2024-12-19 20:29:04.923631
+4|1|Data|1|2024-12-19 20:29:04.925530|2024-12-19 20:29:04.925531
+5|1|data twinning|1|2024-12-19 20:29:04.928799|2024-12-19 20:29:04.928800
+6|1|digital twinning|1|2024-12-19 20:29:04.929823|2024-12-19 20:29:04.929825
+7|1|epistemic humility|1|2024-12-19 20:29:04.930827|2024-12-19 20:29:04.930829
+8|1|extension|1|2024-12-19 20:29:04.934912|2024-12-19 20:29:04.934914
+9|1|farmer|1|2024-12-19 20:29:04.937254|2024-12-19 20:29:04.937258
 sqlite> select * from meaning where word_id = 9;
 53|9|Someone who is responsible for growing food, fiber, fuel, or other natural products consumed or used by people or animals|2024-01-03 19:37:22.280484|2024-01-03 19:37:22.280485
 54|9|I tend to think of the word "farmer" to refer specifically to a group of people who are directly involved in agricultural production. I distinguish farmer from farmworker to indicate variation in labor relations, and also recognize that "farmer" can be a cultural category that is associated with rurality. Corporations (e.g. Cargill, Tyson, Perdue) are not farmers, but landowners who hire farmworkers can be farmers. I associate the term "farmer" with someone for whom agriculture is a major occupation, but in reality I know that is often not the case, many people who identify as farmers also engage in off-farm work, and many people who work on farms might not call themselves farmers. The meaning of this term also varies widely depending on geographic location.|2024-01-03 19:37:22.280485|2024-01-03 19:37:22.280486
@@ -75,7 +62,10 @@ sqlite>
 # Starting the API Server
 
 To start the API server, you first need to set the environment variable
-used by the server to find the database. On Windows, you would set
+used by the server to find the database. If this is not done, the system
+will fall back on the SQLite debug database mentioned above.
+
+On Windows, you would set
 this using the `SET` command, while you would use the `export` command
 on a Mac or Linux machine:
 ```
@@ -90,6 +80,14 @@ For testing, you can also set the `ENABLE_SECURITY` flag to `NO` to
 disable security checks, but this should not be set at all for
 production environments or if you are testing with security enabled.
 By default, security is enabled.
+
+For testing, you can also set the `DEFAULT_USER_ID` flag to the ID
+of the default user. This is _only_ for testing purposes where
+`ENABLE_SECURITY` is also set to `NO`. Normally, the current user is
+based on the security token generated as part of the authentication
+process. This provides a default user for when authentication is not
+done. The default is `1` in cases where security is disabled and this
+is not set.
 
 Now, to run the server, you can run the command `python server.py`. 
 You should see something like the following:
