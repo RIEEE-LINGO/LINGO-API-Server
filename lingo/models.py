@@ -5,20 +5,6 @@ from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 
-class TeamMember(db.Model):
-    __tablename__ = "team_member"
-    team_id: Mapped[int] = mapped_column(ForeignKey("team.id"), primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
-    is_active: Mapped[bool] = mapped_column(default=True)
-    is_owner: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
-    )
-
-
 class User(db.Model):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -54,17 +40,31 @@ class Team(db.Model):
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    team_members: Mapped[List[TeamMember]] = relationship()
+    team_members: Mapped[List["TeamMember"]] = relationship()
     words: Mapped[List["Word"]] = relationship()
+
+
+class TeamMember(db.Model):
+    __tablename__ = "team_member"
+    team_id: Mapped[int] = mapped_column(ForeignKey("team.id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
+    is_owner: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
 
 class Word(db.Model):
     __tablename__ = "word"
     id: Mapped[int] = mapped_column(primary_key=True)
+    team_id: Mapped[int] = mapped_column(db.ForeignKey("team.id"))
     word: Mapped[str] = mapped_column(
         String(50)
     )
-    team_id: Mapped[int] = mapped_column(db.ForeignKey("team.id"))
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
