@@ -1,9 +1,9 @@
 from typing import Optional
 from flask import request, abort
 from firebase_admin.auth import verify_id_token, get_user, UserRecord
-from lingo.models import User, TeamMember
-from config import db, default_team, default_user_id, enable_api_security
-
+from lingo.models import User, Team, TeamMember
+from config import db, default_user_id, enable_api_security
+from sqlalchemy import select
 
 # Note: Based on code from https://pradyothkukkapalli.com/tech/firebase-auth-client-and-backend/
 # The original code just made sure the token was proper, but here we also load
@@ -49,7 +49,13 @@ def get_current_user(create_missing_user=True, add_to_default_team=True) -> Opti
                 db.session.commit()
 
                 if add_to_default_team:
-                    teammate = TeamMember(user_id=user.id, team_id=default_team, email=user.email, is_owner=False)
+                    query = select(Team).where(Team.is_default == True)
+                    team = db.session.scalar(query)
+
+                    if not team:
+                        abort(401, "Default team not defined, cannot add user")
+
+                    teammate = TeamMember(user_id=user.id, team_id=team.id, email=user.email, is_owner=False)
                     db.session.add(teammate)
                     db.session.commit()
 

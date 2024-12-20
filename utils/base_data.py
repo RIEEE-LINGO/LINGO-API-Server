@@ -26,7 +26,8 @@ USERS = [
 
 TEAMS = [
     {
-        "name": "Prototype Team"
+        "name": "Prototype Team",
+        "is_default" : True
     }
 ]
 
@@ -189,7 +190,8 @@ def create_teams(db,users):
 
     for data in TEAMS:
         new_team = Team(
-            team_name=data.get("name")
+            team_name=data.get("name"),
+            is_default=data.get("is_default"),
         )
         db.session.add(new_team)
         teams.append(new_team)
