@@ -34,6 +34,7 @@ class Team(db.Model):
         String(50), unique=True
     )
     is_active: Mapped[bool] = mapped_column(default=True)
+    is_default: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow
     )

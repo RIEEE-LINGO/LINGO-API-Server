@@ -32,15 +32,12 @@ TEAMS = [
 
 TEAM_MEMBERS = [
     {
-        "id": 1,
         "email": "hillsma@appstate.edu"
     },
     {
-        "id": 2,
         "email": "hartcj2@appstate.edu"
     },
     {
-        "id": 3,
         "email": "bournekd@appstate.edu",
     }
 ]
@@ -172,7 +169,7 @@ WORDS = [
 
 
 def create_users(db):
-    users = []
+    users = { }
 
     for data in USERS:
         new_user = User(
@@ -181,27 +178,27 @@ def create_users(db):
             email=data.get("email")
         )
         db.session.add(new_user)
-        users.append(new_user)
+        users[new_user.email] = new_user
 
     db.session.commit()
     return users
 
 
-def create_teams(db):
+def create_teams(db,users):
     teams = []
 
     for data in TEAMS:
         new_team = Team(
-            team_name=data.get("name"),
-            is_active=True
+            team_name=data.get("name")
         )
         db.session.add(new_team)
         teams.append(new_team)
+    db.session.commit()
 
     for data in TEAM_MEMBERS:
         new_member = TeamMember(
-            team_id=1,
-            user_id=data.get("id"),
+            team_id=teams[0].id,
+            user_id=users[data.get("email")].id,
             is_owner=True
         )
         db.session.add(new_member)
