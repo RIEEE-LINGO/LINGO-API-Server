@@ -3,6 +3,15 @@ from config import connex_app as app, dbdir, db
 from os import path, makedirs
 from utils.base_data import create_words, create_teams, create_users
 
+@app.route("/")
+def home():
+    return render_template("home.html")
+
+
+@app.route("/health")
+def health():
+    return Response("OK", status=200)
+
 # If we run this file directly, that means we are in debug mode.
 # Otherwise, this is being loaded by gunicorn and we don't want
 # to call run.
@@ -17,14 +26,5 @@ if __name__ == "__main__":
             teams = create_teams(db, users)
             words = create_words(db, teams[0].id)
 
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=8000)
 
-
-@app.route("/")
-def home():
-    return render_template("home.html")
-
-
-@app.route("/health")
-def health():
-    return Response("OK", status=200)
