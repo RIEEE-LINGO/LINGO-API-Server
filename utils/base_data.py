@@ -169,44 +169,21 @@ WORDS = [
 ]
 
 
-def create_users(db):
+def create_users(db, default_team):
     users = { }
 
     for data in USERS:
         new_user = User(
             first_name=data.get("first_name"),
             last_name=data.get("last_name"),
-            email=data.get("email")
+            email=data.get("email"),
+            current_team_id=default_team
         )
         db.session.add(new_user)
         users[new_user.email] = new_user
 
     db.session.commit()
     return users
-
-
-def create_teams(db,users):
-    teams = []
-
-    for data in TEAMS:
-        new_team = Team(
-            team_name=data.get("name"),
-            is_default=data.get("is_default"),
-        )
-        db.session.add(new_team)
-        teams.append(new_team)
-    db.session.commit()
-
-    for data in TEAM_MEMBERS:
-        new_member = TeamMember(
-            team_id=teams[0].id,
-            user_id=users[data.get("email")].id,
-            is_owner=True
-        )
-        db.session.add(new_member)
-
-    db.session.commit()
-    return teams
 
 
 def create_words(db, team_id):
@@ -238,3 +215,29 @@ def create_words(db, team_id):
         db.session.commit()
 
     return words
+
+
+def create_teams(db):
+    teams = []
+
+    for data in TEAMS:
+        new_team = Team(
+            team_name=data.get("name"),
+            is_default=data.get("is_default"),
+        )
+        db.session.add(new_team)
+        teams.append(new_team)
+    db.session.commit()
+
+    return teams
+
+def create_team_members(db, users, default_team):
+    for data in TEAM_MEMBERS:
+        new_member = TeamMember(
+            team_id=default_team,
+            user_id=users[data.get("email")].id,
+            is_owner=True
+        )
+        db.session.add(new_member)
+
+    db.session.commit()

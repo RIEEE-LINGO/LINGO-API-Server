@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from config import db, ma
 from typing import Optional, List
 from sqlalchemy import String, ForeignKey
@@ -25,6 +25,7 @@ class User(db.Model):
         default=datetime.utcnow, onupdate=datetime.utcnow
     )
     teams: Mapped[List["TeamMember"]] = relationship()
+    current_team_id: Mapped[int] = mapped_column(db.ForeignKey("team.id"))
 
 
 class Team(db.Model):
@@ -36,10 +37,10 @@ class Team(db.Model):
     is_active: Mapped[bool] = mapped_column(default=True)
     is_default: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow
+        default=datetime.now(UTC)
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
+        default=datetime.now(UTC), onupdate=datetime.now(UTC)
     )
     team_members: Mapped[List["TeamMember"]] = relationship()
     words: Mapped[List["Word"]] = relationship()
@@ -52,10 +53,10 @@ class TeamMember(db.Model):
     is_active: Mapped[bool] = mapped_column(default=True)
     is_owner: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow
+        default=datetime.now(UTC)
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
+        default=datetime.now(UTC), onupdate=datetime.now(UTC)
     )
 
 
@@ -68,10 +69,10 @@ class Word(db.Model):
     )
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow
+        default=datetime.now(UTC)
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
+        default=datetime.now(UTC), onupdate=datetime.now(UTC)
     )
     meanings: Mapped[List["Meaning"]] = relationship()
     reflections: Mapped[List["Reflection"]] = relationship()
@@ -86,10 +87,10 @@ class Meaning(db.Model):
     )
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow
+        default=datetime.now(UTC)
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
+        default=datetime.now(UTC), onupdate=datetime.now(UTC)
     )
 
 
@@ -102,10 +103,10 @@ class Reflection(db.Model):
     )
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow
+        default=datetime.now(UTC)
     )
     updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
+        default=datetime.now(UTC), onupdate=datetime.now(UTC)
     )
 
 
@@ -115,6 +116,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         sqla_session = db.session
         include_relationships = True
+        include_fk = True
 
 
 class TeamSchema(ma.SQLAlchemyAutoSchema):

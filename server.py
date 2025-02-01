@@ -1,7 +1,8 @@
 from flask import render_template, Response
 from config import connex_app as app, dbdir, db
 from os import path, makedirs
-from utils.base_data import create_words, create_teams, create_users
+from utils.base_data import create_words, create_teams, create_users, create_team_members
+
 
 @app.route("/")
 def home():
@@ -22,8 +23,9 @@ if __name__ == "__main__":
         makedirs(dbdir)
         with app.app.app_context():
             db.create_all()
-            users = create_users(db)
-            teams = create_teams(db, users)
+            teams = create_teams(db)
+            users = create_users(db, teams[0].id)
+            create_team_members(db, users, teams[0].id)
             words = create_words(db, teams[0].id)
 
     app.run(host="0.0.0.0", port=8000)
