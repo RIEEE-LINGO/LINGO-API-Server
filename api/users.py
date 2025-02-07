@@ -62,6 +62,22 @@ def get_my_user_info():
     return user_schema.dump(user)
 
 
+def update_current_team(body):
+    existing_user = check_user_security()
+
+    # Pick up here
+    if existing_user:
+        existing_user.current_team_id = body['current_team_id']
+        db.session.merge(existing_user)
+        db.session.commit()
+        return user_schema.dump(existing_user), 201
+    else:
+        abort(
+            404,
+            f"User with id {existing_user.id} not found"
+        )
+
+
 def create(user):
     check_user_security()
 

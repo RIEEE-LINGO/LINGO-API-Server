@@ -14,75 +14,47 @@ components:
       required:
         - word
       properties:
-        id:
-          type: "integer"
         word:
-          type: "string"
-        is_active:
-          type: "boolean"
-        created_on:
-          type: "string"
-        modified_on:
           type: "string"
     Meaning:
       type: "object"
       required:
         - meaning
       properties:
-        id:
-          type: "integer"
         meaning:
-          type: "string"
-        is_active:
-          type: "boolean"
-        created_on:
-          type: "string"
-        modified_on:
           type: "string"
     Reflection:
       type: "object"
       required:
         - reflection
       properties:
-        id:
-          type: "integer"
         reflection:
-          type: "string"
-        is_active:
-          type: "boolean"
-        created_on:
-          type: "string"
-        modified_on:
           type: "string"
     User:
       type: "object"
-      required:
-        - first_name
-        - last_name
-        - email
       properties:
         first_name:
           type: "string"
         last_name:
           type: "string"
-        created_on:
+        email:
           type: "string"
-        modified_on:
-          type: "string"
+        current_team:
+          type: "integer"
     Team:
       type: "object"
       required:
         - team_name
-        - is_active
       properties:
         team_name:
           type: "string"
-        is_active:
-          type: "string"
-        created_on:
-          type: "string"
-        modified_on:
-          type: "string"
+    TeamId:
+      type: "object"
+      required:
+        - current_team_id
+      properties:
+        current_team_id:
+          type: "integer"
 
 paths:
   /users:
@@ -160,6 +132,22 @@ paths:
       responses:
         "200":
           description: "Successfully retrieved teams"
+    post:
+      operationId: "api.users.update_current_team"
+      tags:
+        - "Users"
+        - "Teams"
+      summary: "Update the current team"
+      requestBody:
+        description: "Information on the new current team"
+        required: True
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamId"
+      responses:
+        "200":
+          description: "Successfully updated current team"
 
   /my/userinfo:
     get:
