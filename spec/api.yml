@@ -263,6 +263,22 @@ paths:
       responses:
         "200":
           description: "Successfully read list of words for team"
+    post:
+      operationId: "api.words.create_for_team"
+      tags:
+        - "Words"
+      summary: "Create a new word"
+      requestBody:
+        description: "Word to create"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "word"
+              $ref: "#/components/schemas/Word"
+      responses:
+        "200":
+          description: "Successfully created word"
 
   /teams/{team_id}/users:
     get:
@@ -320,7 +336,6 @@ paths:
       responses:
         "200":
           description: "Successfully created word"
-
   /words/{word_id}:
     get:
       operationId: "api.words.get"

@@ -67,6 +67,18 @@ def create(word):
     return word_schema.dump(new_word), 201
 
 
+def create_for_team(team_id, word):
+    check_word_security()
+
+    if "team_id" not in word:
+        word["team_id"] = team_id
+
+    new_word = word_schema.load(word, session=db.session)
+    db.session.add(new_word)
+    db.session.commit()
+    return word_schema.dump(new_word), 201
+
+
 def update(word_id, word):
     check_word_security()
 
