@@ -1,6 +1,8 @@
+from datetime import datetime, UTC
+
 from flask import abort
 from config import db
-from lingo.models import Word, word_schema, words_schema
+from lingo.models import Word, word_schema, words_schema, word_update_schema
 from sqlalchemy import select
 from utils.auth import check_is_team_owner, check_is_team_member
 
@@ -39,11 +41,21 @@ def get(word_id):
 
 def create(word):
     new_word = word_schema.load(word, session=db.session)
-
+    new_word.created_at = datetime.now(UTC)
+    new_word.updated_at = datetime.now(UTC)
     check_is_team_member(new_word.team_id)
 
     db.session.add(new_word)
     db.session.commit()
+
+    word_update = word_update_schema.load({
+        "word_id": new_word.id,
+        "update_type": "C",
+        "value": new_word.word}, session=db.session)
+    word_update.created_at = datetime.now(UTC)
+    db.session.add(word_update)
+    db.session.commit()
+
     return word_schema.dump(new_word), 201
 
 
@@ -55,8 +67,19 @@ def create_for_team(team_id, word):
         word["team_id"] = team_id
 
     new_word = word_schema.load(word, session=db.session)
+    new_word.created_at = datetime.now(UTC)
+    new_word.updated_at = datetime.now(UTC)
     db.session.add(new_word)
     db.session.commit()
+
+    word_update = word_update_schema.load({
+        "word_id": new_word.id,
+        "update_type": "C",
+        "value": new_word.word}, session=db.session)
+    word_update.created_at = datetime.now(UTC)
+    db.session.add(word_update)
+    db.session.commit()
+
     return word_schema.dump(new_word), 201
 
 
@@ -70,8 +93,18 @@ def update(word_id, word):
             word["team_id"] = existing_word.team_id
         update_word = word_schema.load(word, session=db.session)
         check_is_team_owner(existing_word.team_id)
+        existing_word.updated_at = datetime.now(UTC)
         db.session.merge(existing_word)
         db.session.commit()
+
+        word_update = word_update_schema.load({
+            "word_id": update_word.id,
+            "update_type": "U",
+            "value": update_word.word}, session=db.session)
+        word_update.created_at = datetime.now(UTC)
+        db.session.add(word_update)
+        db.session.commit()
+
         return word_schema.dump(existing_word), 201
     else:
         abort(
@@ -86,8 +119,18 @@ def delete(word_id):
     if existing_word:
         check_is_team_owner(existing_word.team_id)
         existing_word.is_active = False
+        existing_word.updated_at = datetime.now(UTC)
         db.session.merge(existing_word)
         db.session.commit()
+
+        word_update = word_update_schema.load({
+            "word_id": existing_word.id,
+            "update_type": "D",
+            "value": existing_word.word}, session=db.session)
+        word_update.created_at = datetime.now(UTC)
+        db.session.add(word_update)
+        db.session.commit()
+
         return word_schema.dump(existing_word), 200
     else:
         abort(

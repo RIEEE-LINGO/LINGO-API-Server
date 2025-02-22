@@ -1,6 +1,8 @@
+from datetime import datetime, UTC
+
 from flask import abort
 from config import db
-from lingo.models import Meaning, meaning_schema, meanings_schema, Word
+from lingo.models import Meaning, meaning_schema, meanings_schema, Word, meaning_update_schema
 from sqlalchemy import select
 from utils.auth import check_is_team_owner, check_is_team_member
 
@@ -53,8 +55,19 @@ def create(word_id, meaning):
     if "word_id" not in meaning:
         meaning["word_id"] = word_id
     new_meaning = meaning_schema.load(meaning, session=db.session)
+    new_meaning.created_at = datetime.now(UTC)
+    new_meaning.updated_at = datetime.now(UTC)
     db.session.add(new_meaning)
     db.session.commit()
+
+    meaning_update = meaning_update_schema.load({
+        "meaning_id": new_meaning.id,
+        "update_type": "C",
+        "value": new_meaning.meaning}, session=db.session)
+    meaning_update.created_at = datetime.now(UTC)
+    db.session.add(meaning_update)
+    db.session.commit()
+
     return meaning_schema.dump(new_meaning), 201
 
 
@@ -69,8 +82,18 @@ def update(meaning_id, meaning):
         check_is_team_owner(word_result.team_id)
 
         update_meaning = meaning_schema.load(meaning, session=db.session)
+        existing_meaning.updated_at = datetime.now(UTC)
         db.session.merge(existing_meaning)
         db.session.commit()
+
+        meaning_update = meaning_update_schema.load({
+            "meaning_id": update_meaning.id,
+            "update_type": "U",
+            "value": update_meaning.meaning}, session=db.session)
+        meaning_update.created_at = datetime.now(UTC)
+        db.session.add(meaning_update)
+        db.session.commit()
+
         return meaning_schema.dump(existing_meaning), 201
     else:
         abort(
@@ -88,9 +111,19 @@ def delete(meaning_id):
 
         check_is_team_owner(word_result.team_id)
 
-        existing_meaning.active = False
+        existing_meaning.is_active = False
+        existing_meaning.updated_at = datetime.now(UTC)
         db.session.merge(existing_meaning)
         db.session.commit()
+
+        meaning_update = meaning_update_schema.load({
+            "meaning_id": existing_meaning.id,
+            "update_type": "D",
+            "value": existing_meaning.meaning}, session=db.session)
+        meaning_update.created_at = datetime.now(UTC)
+        db.session.add(meaning_update)
+        db.session.commit()
+
         return meaning_schema.dump(existing_meaning), 200
     else:
         abort(

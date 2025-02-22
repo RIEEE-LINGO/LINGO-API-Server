@@ -1,6 +1,8 @@
+from datetime import datetime, UTC
+
 from flask import abort
 from config import db
-from lingo.models import Reflection, reflection_schema, reflections_schema, Word
+from lingo.models import Reflection, reflection_schema, reflections_schema, Word, reflection_update_schema
 from sqlalchemy import select
 from utils.auth import check_is_team_owner, check_is_team_member
 
@@ -52,8 +54,19 @@ def create(word_id, reflection):
     if "word_id" not in reflection:
         reflection["word_id"] = word_id
     new_reflection = reflection_schema.load(reflection, session=db.session)
+    new_reflection.created_at = datetime.now(UTC)
+    new_reflection.updated_at = datetime.now(UTC)
     db.session.add(new_reflection)
     db.session.commit()
+
+    reflection_update = reflection_update_schema.load({
+        "reflection_id": new_reflection.id,
+        "update_type": "C",
+        "value": new_reflection.reflection}, session=db.session)
+    reflection_update.created_at = datetime.now(UTC)
+    db.session.add(reflection_update)
+    db.session.commit()
+
     return reflection_schema.dump(new_reflection), 201
 
 
@@ -68,8 +81,18 @@ def update(reflection_id, reflection):
         check_is_team_owner(word_result.team_id)
 
         update_reflection = reflection_schema.load(reflection, session=db.session)
+        existing_reflection.updated_at = datetime.now(UTC)
         db.session.merge(existing_reflection)
         db.session.commit()
+
+        reflection_update = reflection_update_schema.load({
+            "reflection_id": update_reflection.id,
+            "update_type": "U",
+            "value": update_reflection.reflection}, session=db.session)
+        reflection_update.created_at = datetime.now(UTC)
+        db.session.add(reflection_update)
+        db.session.commit()
+
         return reflection_schema.dump(existing_reflection), 201
     else:
         abort(
@@ -87,10 +110,20 @@ def delete(reflection_id):
 
         check_is_team_owner(word_result.team_id)
 
-        existing_reflection.active = False
+        existing_reflection.is_active = False
+        existing_reflection.updated_at = datetime.now(UTC)
         db.session.merge(existing_reflection)
         db.session.commit()
-        return True
+
+        reflection_update = reflection_update_schema.load({
+            "reflection_id": existing_reflection.id,
+            "update_type": "D",
+            "value": existing_reflection.reflection}, session=db.session)
+        reflection_update.created_at = datetime.now(UTC)
+        db.session.add(reflection_update)
+        db.session.commit()
+
+        return reflection_schema.dump(existing_reflection), 200
     else:
         abort(
             404,
