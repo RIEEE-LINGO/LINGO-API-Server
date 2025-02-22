@@ -12,6 +12,15 @@ def check_user():
     return user
 
 
+def check_is_site_owner():
+    user = check_user()
+    if not user.is_admin:
+        abort(
+            401,
+            "Unauthorized"
+        )
+
+
 def check_is_team_member(team_id):
     user = check_user()
 

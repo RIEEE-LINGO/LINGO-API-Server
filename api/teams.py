@@ -1,23 +1,9 @@
 from flask import abort
-from config import enable_api_security, db
+from config import db
 from lingo.models import Team, team_schema, teams_schema, TeamMember, User
 from sqlalchemy import select
 from utils.utils import get_current_user
-
-
-def check_team_security():
-    user = get_current_user()
-    if user is None:
-        abort(
-            401,
-            "Unauthorized"
-        )
-
-    # Add other rules for user checking here
-    # TODO
-
-    return user
-
+from utils.auth import check_is_team_owner, check_is_team_member, check_user, check_is_site_owner
 
 
 def add_filter(query, filter):
@@ -30,7 +16,7 @@ def add_filter(query, filter):
 
 
 def get_all(filter = "onlyActive"):
-    check_team_security()
+    check_is_site_owner()
 
     query = add_filter(select(Team), filter)
     result = db.session.scalars(query).all()
@@ -38,7 +24,7 @@ def get_all(filter = "onlyActive"):
 
 
 def get(team_id):
-    check_team_security()
+    check_is_team_member()
 
     query = select(Team).where(Team.id == team_id)
     result = db.session.execute(query).one_or_none()
@@ -52,7 +38,7 @@ def get(team_id):
 
 
 def get_teams_for_user(user_id, filter = "onlyActive"):
-    check_team_security()
+    check_user()
 
     query = add_filter(select(Team).join(Team.team_members).where(TeamMember.user_id == user_id), filter)
     result = db.session.scalars(query).all()
@@ -60,7 +46,7 @@ def get_teams_for_user(user_id, filter = "onlyActive"):
 
 
 def get_my_teams(filter = "onlyActive"):
-    user = check_team_security()
+    user = check_user()
 
     query = add_filter(select(Team).join(Team.team_members).where(TeamMember.user_id == user.id), filter)
     result = db.session.scalars(query).all()
@@ -68,7 +54,7 @@ def get_my_teams(filter = "onlyActive"):
 
 
 def create(team):
-    check_team_security()
+    check_is_site_owner()
 
     new_team = team_schema.load(team, session=db.session)
     db.session.add(new_team)
@@ -77,7 +63,7 @@ def create(team):
 
 
 def update(team_id, team):
-    check_team_security()
+    check_is_team_owner()
 
     existing_team = Team.query.where(Team.id == team_id).one_or_none()
     if existing_team:
@@ -96,7 +82,7 @@ def update(team_id, team):
 
 
 def delete(team_id):
-    check_team_security()
+    check_is_team_owner()
 
     existing_team = Team.query.where(Team.id == team_id).one_or_none()
     if existing_team:
