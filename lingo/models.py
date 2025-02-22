@@ -79,6 +79,19 @@ class Word(db.Model):
     reflections: Mapped[List["Reflection"]] = relationship()
 
 
+class WordUpdate(db.Model):
+    __tablename__ = "word_update"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    word_id: Mapped[int] = mapped_column(db.ForeignKey("word.id"))
+    update_type: Mapped[str] = mapped_column(String(1))
+    value: Mapped[str] = mapped_column(
+        String(50)
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.now(UTC)
+    )
+
+
 class Meaning(db.Model):
     __tablename__ = "meaning"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -95,6 +108,19 @@ class Meaning(db.Model):
     )
 
 
+class MeaningUpdate(db.Model):
+    __tablename__ = "meaning_update"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    meaning_id: Mapped[int] = mapped_column(db.ForeignKey("meaning.id"))
+    update_type: Mapped[str] = mapped_column(String(1))
+    value: Mapped[str] = mapped_column(
+        String(1000)
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.now(UTC)
+    )
+
+
 class Reflection(db.Model):
     __tablename__ = "reflection"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -108,6 +134,19 @@ class Reflection(db.Model):
     )
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.now(UTC), onupdate=datetime.now(UTC)
+    )
+
+
+class ReflectionUpdate(db.Model):
+    __tablename__ = "reflection_update"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    reflection_id: Mapped[int] = mapped_column(db.ForeignKey("reflection.id"))
+    update_type: Mapped[str] = mapped_column(String(1))
+    value: Mapped[str] = mapped_column(
+        String(1000)
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        default=datetime.now(UTC)
     )
 
 
@@ -144,11 +183,30 @@ class WordSchema(ma.SQLAlchemyAutoSchema):
         include_relationships = True
         include_fk = True
 
+
+class WordUpdateSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = WordUpdate
+        load_instance = True
+        sqla_session = db.session
+        include_relationships = True
+        include_fk = True
+
+
 class MeaningSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Meaning
         load_instance = True
         sqla_session = db.session
+        include_fk = True
+
+
+class MeaningUpdateSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MeaningUpdate
+        load_instance = True
+        sqla_session = db.session
+        include_relationships = True
         include_fk = True
 
 
@@ -160,16 +218,31 @@ class ReflectionSchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
 
 
+class ReflectionUpdateSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = ReflectionUpdate
+        load_instance = True
+        sqla_session = db.session
+        include_relationships = True
+        include_fk = True
+
+
 user_schema = UserSchema()
 team_schema = TeamSchema()
 team_member_schema = TeamMemberSchema()
 word_schema = WordSchema()
+word_update_schema = WordUpdateSchema()
 meaning_schema = MeaningSchema()
+meaning_update_schema = MeaningUpdateSchema()
 reflection_schema = ReflectionSchema()
+reflection_update_schema = ReflectionUpdateSchema()
 
 users_schema = UserSchema(many=True)
 teams_schema = TeamSchema(many=True)
 team_members_schema = TeamMemberSchema(many=True)
 words_schema = WordSchema(many=True)
+word_updates_schema = WordUpdateSchema(many=True)
 meanings_schema = MeaningSchema(many=True)
+meaning_updates_schema = MeaningUpdateSchema(many=True)
 reflections_schema = ReflectionSchema(many=True)
+reflection_updates_schema = ReflectionUpdateSchema(many=True)

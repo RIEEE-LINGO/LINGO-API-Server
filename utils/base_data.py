@@ -26,20 +26,63 @@ USERS = [
 
 TEAMS = [
     {
-        "name": "Prototype Team",
+        "name": "Global Team",
         "is_default" : True
+    },
+    {
+        "name": "RIEEE",
+        "is_default": False
+    },
+    {
+        "name": "STEPS Center",
+        "is_default": False
+    },
+    {
+        "name": "PLSE Lab",
+        "is_default": False
     }
 ]
 
 TEAM_MEMBERS = [
     {
-        "email": "hillsma@appstate.edu"
+        "email": "hillsma@appstate.edu",
+        "name": "Global Team",
+        "owner": True
     },
     {
-        "email": "hartcj2@appstate.edu"
+        "email": "hillsma@appstate.edu",
+        "name": "RIEEE",
+        "owner": False
+    },
+    {
+        "email": "hillsma@appstate.edu",
+        "name": "PLSE Lab",
+        "owner": True
+    },
+    {
+        "email": "hartcj2@appstate.edu",
+        "name": "Global Team",
+        "owner": True
+    },
+    {
+        "email": "hartcj2@appstate.edu",
+        "name": "RIEEE",
+        "owner": False
     },
     {
         "email": "bournekd@appstate.edu",
+        "name": "Global Team",
+        "owner": True
+    },
+    {
+        "email": "bournekd@appstate.edu",
+        "name": "RIEEE",
+        "owner": True
+    },
+    {
+        "email": "bournekd@appstate.edu",
+        "name": "STEPS Center",
+        "owner": False
     }
 ]
 
@@ -218,7 +261,7 @@ def create_words(db, team_id):
 
 
 def create_teams(db):
-    teams = []
+    teams = {}
 
     for data in TEAMS:
         new_team = Team(
@@ -226,17 +269,17 @@ def create_teams(db):
             is_default=data.get("is_default"),
         )
         db.session.add(new_team)
-        teams.append(new_team)
+        teams[new_team.team_name] = new_team
     db.session.commit()
 
     return teams
 
-def create_team_members(db, users, default_team):
+def create_team_members(db, users, teams):
     for data in TEAM_MEMBERS:
         new_member = TeamMember(
-            team_id=default_team,
+            team_id=teams[data.get("name")].id,
             user_id=users[data.get("email")].id,
-            is_owner=True
+            is_owner=data.get("owner"),
         )
         db.session.add(new_member)
 

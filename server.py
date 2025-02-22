@@ -24,9 +24,9 @@ if __name__ == "__main__":
         with app.app.app_context():
             db.create_all()
             teams = create_teams(db)
-            users = create_users(db, teams[0].id)
-            create_team_members(db, users, teams[0].id)
-            words = create_words(db, teams[0].id)
+            users = create_users(db, teams["Global Team"].id)
+            create_team_members(db, users, teams)
+            words = create_words(db, teams["Global Team"].id)
 
     app.app.debug = True
     app.run(host="0.0.0.0", port=8000)
