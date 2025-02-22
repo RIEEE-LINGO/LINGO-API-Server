@@ -2,7 +2,6 @@ from flask import abort
 from config import db
 from lingo.models import Team, team_schema, teams_schema, TeamMember, User
 from sqlalchemy import select
-from utils.utils import get_current_user
 from utils.auth import check_is_team_owner, check_is_team_member, check_user, check_is_site_owner
 
 
@@ -24,7 +23,7 @@ def get_all(filter = "onlyActive"):
 
 
 def get(team_id):
-    check_is_team_member()
+    check_is_team_member(team_id)
 
     query = select(Team).where(Team.id == team_id)
     result = db.session.execute(query).one_or_none()

@@ -1,21 +1,9 @@
 from flask import abort
-from config import enable_api_security, db
+from config import db
 from lingo.models import User, Team, user_schema, users_schema
-from utils.utils import get_current_user
 from sqlalchemy import select
-
-def check_user_security():
-    user = get_current_user()
-    if user is None:
-        abort(
-            401,
-            "Unauthorized"
-        )
-
-    # Add other rules for user checking here
-    # TODO
-
-    return user
+from utils.auth import check_is_team_owner, check_is_team_member, check_user, check_is_site_owner, \
+    check_is_team_or_site_owner
 
 
 def add_filter(query, filter):
@@ -28,7 +16,7 @@ def add_filter(query, filter):
 
 
 def get_all(filter = "onlyActive"):
-    check_user_security()
+    check_is_site_owner()
 
     query = add_filter(select(User).order_by(User.email), filter)
     result = db.session.scalars(query).all()
@@ -36,7 +24,7 @@ def get_all(filter = "onlyActive"):
 
 
 def get_all_for_team(team_id, filter = "onlyActive"):
-    check_user_security()
+    check_is_team_owner(team_id)
 
     query = add_filter(select(User).join(User.teams).where(Team.id == team_id).order_by(User.email), filter)
     result = db.session.scalars(query).all()
@@ -44,12 +32,11 @@ def get_all_for_team(team_id, filter = "onlyActive"):
 
 
 def get(user_id):
-    check_user_security()
-
     query = select(User).where(User.id == user_id)
     result = db.session.scalar(query)
 
     if result is not None:
+        check_is_team_or_site_owner(result.team_id)
         return user_schema.dump(result)
     else:
         abort(
@@ -58,16 +45,16 @@ def get(user_id):
 
 
 def get_my_user_info():
-    user = check_user_security()
+    user = check_user()
     return user_schema.dump(user)
 
 
 def update_current_team(body):
-    existing_user = check_user_security()
+    existing_user = check_user()
 
-    # Pick up here
     if existing_user:
         existing_user.current_team_id = body['current_team_id']
+        check_is_team_member(existing_user.current_team_id)
         db.session.merge(existing_user)
         db.session.commit()
         return user_schema.dump(existing_user), 201
@@ -79,19 +66,17 @@ def update_current_team(body):
 
 
 def create(user):
-    check_user_security()
-
     new_user = user_schema.load(user, session=db.session)
+    check_is_team_or_site_owner(new_user.team_id)
     db.session.add(new_user)
     db.session.commit()
     return user_schema.dump(new_user), 201
 
 
 def update(user_id, user):
-    check_user_security()
-
     existing_user = User.query.where(User.id == user_id).one_or_none()
     if existing_user:
+        check_is_team_or_site_owner(existing_user.team_id)
         update_user = user_schema.load(user, session=db.session)
         existing_user.first_name = update_user.first_name
         existing_user.last_name = update_user.last_name
