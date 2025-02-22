@@ -141,7 +141,7 @@ class WordSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         sqla_session = db.session
         include_relationships = True
-
+        include_fk = True
 
 class MeaningSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
