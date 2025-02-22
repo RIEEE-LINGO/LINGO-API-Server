@@ -1,6 +1,6 @@
 from flask import abort
 from config import enable_api_security, db
-from lingo.models import Meaning, meaning_schema, meanings_schema
+from lingo.models import Meaning, meaning_schema, meanings_schema, Word, word_schema
 from utils.utils import get_current_user
 from sqlalchemy import select
 

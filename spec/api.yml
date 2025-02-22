@@ -305,21 +305,6 @@ paths:
           description: "Successfully read list of users for team"
 
   /words:
-    get:
-      operationId: "api.words.get_all"
-      parameters:
-        - in: query
-          name: filter
-          schema:
-            type: string
-            enum: [all, onlyActive, onlyDeleted]
-          required: false
-      tags:
-        - "Words"
-      summary: "Return the list of words"
-      responses:
-        "200":
-          description: "Successfully read list of words"
     post:
       operationId: "api.words.create"
       tags:
