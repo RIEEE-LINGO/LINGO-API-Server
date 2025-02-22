@@ -183,10 +183,10 @@ paths:
       requestBody:
         description: "Team to create"
         required: True
+        x-body-name: "team"
         content:
           application/json:
             schema:
-              x-body-name: "team"
               $ref: "#/components/schemas/Team"
       responses:
         "200":
@@ -216,10 +216,10 @@ paths:
       requestBody:
         description: "Team to update"
         required: True
+        x-body-name: "team"
         content:
           application/json:
             schema:
-              x-body-name: "team"
               $ref: "#/components/schemas/Team"
       responses:
         "200":
@@ -271,10 +271,10 @@ paths:
       requestBody:
         description: "Word to create"
         required: True
+        x-body-name: "word"
         content:
           application/json:
             schema:
-              x-body-name: "word"
               $ref: "#/components/schemas/Word"
       responses:
         "200":
@@ -328,10 +328,10 @@ paths:
       requestBody:
         description: "Word to create"
         required: True
+        x-body-name: "word"
         content:
           application/json:
             schema:
-              x-body-name: "word"
               $ref: "#/components/schemas/Word"
       responses:
         "200":
@@ -360,10 +360,10 @@ paths:
       requestBody:
         description: "Word to update"
         required: True
+        x-body-name: "word"
         content:
           application/json:
             schema:
-              x-body-name: "word"
               $ref: "#/components/schemas/Word"
       responses:
         "200":
@@ -414,10 +414,10 @@ paths:
       requestBody:
         description: "Meaning to create"
         required: True
+        x-body-name: "meaning"
         content:
           application/json:
             schema:
-              x-body-name: "meaning"
               $ref: "#/components/schemas/Meaning"
       responses:
         "200":
@@ -447,10 +447,10 @@ paths:
       requestBody:
         description: "Meaning to update"
         required: True
+        x-body-name: "meaning"
         content:
           application/json:
             schema:
-              x-body-name: "meaning"
               $ref: "#/components/schemas/Meaning"
       responses:
         "200":
@@ -501,10 +501,10 @@ paths:
       requestBody:
         description: "Reflection to create"
         required: True
+        x-body-name: "reflection"
         content:
           application/json:
             schema:
-              x-body-name: "reflection"
               $ref: "#/components/schemas/Reflection"
       responses:
         "200":
@@ -534,10 +534,10 @@ paths:
       requestBody:
         description: "Reflection to update"
         required: True
+        x-body-name: "reflection"
         content:
           application/json:
             schema:
-              x-body-name: "reflection"
               $ref: "#/components/schemas/Reflection"
       responses:
         "200":
