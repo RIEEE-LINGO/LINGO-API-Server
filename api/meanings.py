@@ -1,22 +1,8 @@
 from flask import abort
-from config import enable_api_security, db
-from lingo.models import Meaning, meaning_schema, meanings_schema, Word, word_schema
-from utils.utils import get_current_user
+from config import db
+from lingo.models import Meaning, meaning_schema, meanings_schema, Word
 from sqlalchemy import select
-
-def check_meaning_security():
-    user = get_current_user()
-    if user is None:
-        abort(
-            401,
-            "Unauthorized"
-        )
-
-    # Add other rules for user checking here
-    # TODO
-
-    return user
-
+from utils.auth import check_is_team_owner, check_is_team_member
 
 
 def add_filter(query, filter):
@@ -29,21 +15,27 @@ def add_filter(query, filter):
 
 
 def get_all(word_id, filter="onlyActive"):
-    check_meaning_security()
+    word_id = int(word_id)
+    word_query = select(Word).where(Word.id == word_id)
+    word_result = db.session.scalar(word_query)
+
+    check_is_team_member(word_result.team_id)
 
     query = add_filter(select(Meaning).where(Meaning.word_id == word_id), filter)
     result = db.session.scalars(query).all()
-    return meanings_schema.dump(result)
+    return meanings_schema.dump(result), 200
 
 
 def get(meaning_id):
-    check_meaning_security()
-
     query = select(Meaning).where(Meaning.id == meaning_id)
     result = db.session.scalar(query)
 
     if result is not None:
-        return meaning_schema.dump(result)
+        word_query = select(Word).where(Word.id == result.word_id)
+        word_result = db.session.scalar(word_query)
+        check_is_team_member(word_result.team_id)
+
+        return meaning_schema.dump(result), 200
     else:
         abort(
             404,
@@ -52,7 +44,11 @@ def get(meaning_id):
 
 
 def create(word_id, meaning):
-    check_meaning_security()
+    word_id = int(word_id)
+    word_query = select(Word).where(Word.id == word_id)
+    word_result = db.session.scalar(word_query)
+
+    check_is_team_member(word_result.team_id)
 
     if "word_id" not in meaning:
         meaning["word_id"] = word_id
@@ -62,12 +58,16 @@ def create(word_id, meaning):
     return meaning_schema.dump(new_meaning), 201
 
 
-def update(word_id, meaning_id, meaning):
-    check_meaning_security()
-
+def update(meaning_id, meaning):
     # TODO: It may make sense to check to ensure the word ID has not changed.
-    existing_meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
+    existing_meaning = Meaning.query.where(Meaning.id == meaning_id).one_or_none()
     if existing_meaning:
+        word_id = int(existing_meaning.word_id)
+        word_query = select(Word).where(Word.id == word_id)
+        word_result = db.session.scalar(word_query)
+
+        check_is_team_owner(word_result.team_id)
+
         update_meaning = meaning_schema.load(meaning, session=db.session)
         db.session.merge(existing_meaning)
         db.session.commit()
@@ -75,21 +75,25 @@ def update(word_id, meaning_id, meaning):
     else:
         abort(
             404,
-            f"Meaning with id {meaning_id} for word with id {word_id} not found"
+            f"Meaning with id {meaning_id} not found"
         )
 
 
-def delete(word_id, meaning_id):
-    check_meaning_security()
-
-    existing_meaning = Meaning.query.where(Meaning.id == meaning_id, Meaning.word_id == word_id).one_or_none()
+def delete(meaning_id):
+    existing_meaning = Meaning.query.where(Meaning.id == meaning_id).one_or_none()
     if existing_meaning:
+        word_id = int(existing_meaning.word_id)
+        word_query = select(Word).where(Word.id == word_id)
+        word_result = db.session.scalar(word_query)
+
+        check_is_team_owner(word_result.team_id)
+
         existing_meaning.active = False
         db.session.merge(existing_meaning)
         db.session.commit()
-        return True
+        return meaning_schema.dump(existing_meaning), 200
     else:
         abort(
             404,
-            f"Meaning with id {meaning_id} for word with id {word_id} not found"
+            f"Meaning with id {meaning_id} not found"
         )

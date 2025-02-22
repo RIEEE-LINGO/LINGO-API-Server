@@ -10,7 +10,7 @@ from sqlalchemy import select
 # the associated user so we can tell which user is accessing this data. This is
 # needed to ensure the user has permission to access the data they are trying to
 # retrieve, e.g., that the words are from a project they are part of.
-def get_current_user(create_missing_user=True, add_to_default_team=True) -> Optional[str]:
+def get_current_user(create_missing_user=True, add_to_default_team=True) -> Optional[User]:
     # First, see if API security is enabled. If not, we just look up the user
     # info for the default user and skip the rest.
     if not enable_api_security:
