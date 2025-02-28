@@ -149,6 +149,17 @@ paths:
         "200":
           description: "Successfully updated current team"
 
+  /my/team-membership:
+    get:
+      operationId: "api.teams.get_my_team_membership"
+      tags:
+        - "Teams"
+        - "Users"
+      summary: "Return information about membership in the current team"
+      responses:
+        "200":
+          description: "Successfully retrieved team membership info"
+
   /my/userinfo:
     get:
       operationId: "api.users.get_my_user_info"

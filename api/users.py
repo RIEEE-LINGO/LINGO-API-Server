@@ -1,6 +1,7 @@
+from certifi import where
 from flask import abort
 from config import db
-from lingo.models import User, Team, user_schema, users_schema
+from lingo.models import User, Team, user_schema, users_schema, TeamMember
 from sqlalchemy import select
 from utils.auth import check_is_team_owner, check_is_team_member, check_user, check_is_site_owner, \
     check_is_team_or_site_owner
@@ -26,7 +27,9 @@ def get_all(filter = "onlyActive"):
 def get_all_for_team(team_id, filter = "onlyActive"):
     check_is_team_owner(team_id)
 
-    query = add_filter(select(User).join(User.teams).where(Team.id == team_id).order_by(User.email), filter)
+    query = add_filter(select(User,TeamMember).where(User.id == TeamMember.user_id, TeamMember.team_id == team_id), filter)
+    # query = select(User).join(User.teams).join(Team, TeamMember.team_id == Team.id)
+        # .order_by(User.email))
     result = db.session.scalars(query).all()
     return users_schema.dump(result)
 

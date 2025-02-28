@@ -1,6 +1,6 @@
 from flask import abort
 from config import db
-from lingo.models import Team, team_schema, teams_schema, TeamMember, User
+from lingo.models import Team, team_schema, teams_schema, TeamMember, User, team_member_schema
 from sqlalchemy import select
 from utils.auth import check_is_team_owner, check_is_team_member, check_user, check_is_site_owner
 
@@ -50,6 +50,13 @@ def get_my_teams(filter = "onlyActive"):
     query = add_filter(select(Team).join(Team.team_members).where(TeamMember.user_id == user.id), filter)
     result = db.session.scalars(query).all()
     return teams_schema.dump(result)
+
+
+def get_my_team_membership():
+    user = check_user()
+    query = select(TeamMember).where(TeamMember.user_id == user.id, TeamMember.team_id == user.current_team_id)
+    result = db.session.scalars(query).one_or_none()
+    return team_member_schema.dump(result)
 
 
 def create(team):
